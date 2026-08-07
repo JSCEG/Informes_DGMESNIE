@@ -26,6 +26,7 @@
     "check": "npm run test && npm run build:fixture && node scripts/check-dist.mjs --output .shadow/fixture-dist"
   },
   "devDependencies": {
+    "pdf-lib": "^1.17.1",
     "playwright": "^1.62.0"
   },
   "dependencies": {

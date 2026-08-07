@@ -243,12 +243,33 @@ document.addEventListener('fullscreenchange', () => {
   if (mode === 'paged') fitPage();
 });
 
+// Al imprimir, las hojas se clonan y las originales quedan ocultas pero vivas en
+// el DOM. Con el identificador duplicado, el navegador resuelve cada `#ancla` a
+// la copia oculta y el PDF sale sin un solo destino interno: el índice deja de
+// ser navegable. Mientras exista el árbol de impresión, los identificadores
+// viven sólo en él.
+function stashReaderIds() {
+  if (!reportMain) return;
+  for (const element of reportMain.querySelectorAll('[id]')) {
+    element.dataset.readerId = element.id;
+    element.removeAttribute('id');
+  }
+}
+
+function restoreReaderIds() {
+  if (!reportMain) return;
+  for (const element of reportMain.querySelectorAll('[data-reader-id]')) {
+    element.id = element.dataset.readerId;
+    delete element.dataset.readerId;
+  }
+}
+
 function buildPrintRoot() {
   document.getElementById('pdf-print-root')?.remove();
+  restoreReaderIds();
   const root = document.createElement('div');
   root.id = 'pdf-print-root';
   root.className = reportMain?.classList.contains('model-report') ? 'model-report model-pages' : '';
-  root.setAttribute('aria-hidden', 'true');
   for (const page of pageCandidates) {
     const clone = page.cloneNode(true);
     clone.hidden = false;
@@ -257,6 +278,7 @@ function buildPrintRoot() {
     root.append(clone);
   }
   document.body.append(root);
+  stashReaderIds();
 }
 
 function preparePrintLayout({ clone = true } = {}) {
@@ -273,6 +295,7 @@ function preparePrintLayout({ clone = true } = {}) {
 function restoreReaderAfterPrint() {
   if (window.__pdfExporting) return;
   document.getElementById('pdf-print-root')?.remove();
+  restoreReaderIds();
   document.body.classList.remove('pdf-export');
   updateReaderControls();
 }

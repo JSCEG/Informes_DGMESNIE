@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process';
-import { copyFile, mkdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chromium } from 'playwright';
+import { PDFDocument, PDFName, PDFNull, PDFNumber } from 'pdf-lib';
 import { parseArgs } from './lib/args.mjs';
 
 const args = parseArgs();
@@ -128,6 +129,47 @@ try {
   if (localFailures.length) throw new Error(`Fallaron recursos locales: ${localFailures.join(', ')}.`);
   if (consoleErrors.length) throw new Error(`La página produjo errores de consola: ${consoleErrors.join(' | ')}.`);
 
+  // El navegador descarta los enlaces de fragmento al imprimir: no genera
+  // destino ni anotación. Se recoge la geometría de cada ancla interna para
+  // reconstruirla como salto real dentro del PDF.
+  const internalLinks = await page.evaluate(() => {
+    const sheets = [...document.querySelectorAll('#pdf-print-root > .reader-page')];
+    const sheetOf = (element) => sheets.indexOf(element.closest('.reader-page'));
+    const links = [];
+    for (const [index, sheet] of sheets.entries()) {
+      for (const anchor of sheet.querySelectorAll('a[href^="#"]')) {
+        const id = decodeURIComponent(anchor.getAttribute('href').slice(1));
+        if (!id) continue;
+        const target = document.querySelector(`#pdf-print-root [id="${CSS.escape(id)}"]`);
+        if (!target) continue;
+        const targetSheet = sheetOf(target);
+        if (targetSheet < 0 || targetSheet === index) continue;
+        const sheetBounds = sheet.getBoundingClientRect();
+        const bounds = anchor.getBoundingClientRect();
+        if (bounds.width < 1 || bounds.height < 1) continue;
+        const targetBounds = target.getBoundingClientRect();
+        const targetSheetBounds = sheets[targetSheet].getBoundingClientRect();
+        // El folio impreso en el índice permite comprobar que el salto lleva
+        // exactamente a la hoja anunciada.
+        const printed = anchor.closest('.report-toc') ? anchor.querySelector('em')?.textContent?.trim() : null;
+        links.push({
+          id,
+          fromPage: index,
+          toPage: targetSheet,
+          printedFolio: printed && /^\d+$/.test(printed) ? Number(printed) : null,
+          left: bounds.left - sheetBounds.left,
+          top: bounds.top - sheetBounds.top,
+          width: bounds.width,
+          height: bounds.height,
+          targetTop: Math.max(0, targetBounds.top - targetSheetBounds.top),
+          sheetWidth: sheetBounds.width,
+          sheetHeight: sheetBounds.height
+        });
+      }
+    }
+    return links;
+  });
+
   await page.pdf({
     path: temporaryOutput,
     preferCSSPageSize: true,
@@ -136,6 +178,14 @@ try {
     outline: true,
     displayHeaderFooter: false
   });
+  // Un índice que anuncia una hoja y salta a otra es peor que uno sin enlaces.
+  const misdirected = internalLinks
+    .filter((link) => link.printedFolio !== null && link.printedFolio !== link.toPage + 1)
+    .map((link) => ({ id: link.id, anuncia: link.printedFolio, salta_a: link.toPage + 1 }));
+  if (misdirected.length) throw new Error(`El índice anuncia hojas que no coinciden con su destino: ${JSON.stringify(misdirected.slice(0, 8))}.`);
+  const tocLinks = internalLinks.filter((link) => link.printedFolio !== null).length;
+
+  const navigation = { ...await addInternalLinks(temporaryOutput, internalLinks), toc_links: tocLinks };
   await rename(temporaryOutput, output);
   if (publicOutput) {
     await mkdir(path.dirname(publicOutput), { recursive: true });
@@ -146,13 +196,57 @@ try {
     route,
     output,
     public_output: publicOutput,
-    ...layout
+    ...layout,
+    navigation
   }, null, 2)}\n`);
-  console.log(JSON.stringify({ status: 'pdf-exported', output, public_output: publicOutput, ...layout }, null, 2));
+  console.log(JSON.stringify({ status: 'pdf-exported', output, public_output: publicOutput, ...layout, navigation }, null, 2));
 } finally {
   await browser?.close().catch(() => {});
   server.kill('SIGTERM');
   await rm(temporaryOutput, { force: true }).catch(() => {});
+}
+
+// Reconstruye cada ancla interna como anotación /Link con acción /GoTo. Las
+// coordenadas del navegador van en píxeles CSS desde la esquina superior
+// izquierda; el PDF las mide en puntos desde la inferior.
+async function addInternalLinks(filePath, links) {
+  if (!links.length) return { internal_links: 0, skipped: 0 };
+  const document = await PDFDocument.load(await readFile(filePath));
+  const pages = document.getPages();
+  let added = 0;
+  let skipped = 0;
+  for (const link of links) {
+    const source = pages[link.fromPage];
+    const target = pages[link.toPage];
+    if (!source || !target) {
+      skipped += 1;
+      continue;
+    }
+    const { width: pointWidth, height: pointHeight } = source.getSize();
+    const scaleX = pointWidth / link.sheetWidth;
+    const scaleY = pointHeight / link.sheetHeight;
+    const left = link.left * scaleX;
+    const right = (link.left + link.width) * scaleX;
+    const bottom = pointHeight - (link.top + link.height) * scaleY;
+    const top = pointHeight - link.top * scaleY;
+    const destinationY = target.getSize().height - link.targetTop * scaleY;
+    const annotation = document.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [left, bottom, right, top],
+      Border: [0, 0, 0],
+      F: 4,
+      A: document.context.obj({
+        S: 'GoTo',
+        D: [target.ref, PDFName.of('XYZ'), PDFNull, PDFNumber.of(destinationY), PDFNull]
+      })
+    });
+    // addAnnot crea el arreglo /Annots cuando la hoja aún no tiene ninguno.
+    source.node.addAnnot(document.context.register(annotation));
+    added += 1;
+  }
+  await writeFile(filePath, await document.save());
+  return { internal_links: added, skipped };
 }
 
 async function waitForServer(url) {
