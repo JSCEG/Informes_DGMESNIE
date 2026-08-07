@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "allowed_report_ids": [
+    "radar-regulatorio-energ-tico-dgmesnie"
+  ],
+  "allowed_source_hosts": [
+    "dof.gob.mx",
+    "www.dof.gob.mx",
+    "sidof.segob.gob.mx",
+    "www.gob.mx",
+    "gob.mx",
+    "energia.gob.mx",
+    "www.energia.gob.mx",
+    "sie.energia.gob.mx",
+    "cenace.gob.mx",
+    "www.cenace.gob.mx",
+    "cfe.mx",
+    "www.cfe.mx",
+    "app.cfe.mx",
+    "cenagas.gob.mx",
+    "www.cenagas.gob.mx",
+    "conuee.gob.mx",
+    "www.conuee.gob.mx",
+    "ineel.mx",
+    "www.ineel.mx",
+    "pemex.com",
+    "www.pemex.com"
+  ],
+  "allowed_block_types": [
+    "paragraph",
+    "lead",
+    "heading",
+    "bullets",
+    "table",
+    "callout",
+    "metrics",
+    "timeline",
+    "steps",
+    "process",
+    "quote",
+    "flow",
+    "code"
+  ],
+  "max_sections": 100,
+  "max_sources": 300,
+  "max_contract_bytes": 2500000,
+  "forbidden_field_names": [
+    "_private",
+    "private_provenance",
+    "local_path",
+    "source_path",
+    "sharepoint_manifest",
+    "onedrive_manifest",
+    "recipients",
+    "api_key",
+    "secret"
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "report_id": "radar-regulatorio-energ-tico-dgmesnie",
+  "slug": "radar-regulatorio-energetico",
+  "title": "Panorama regulatorio energético",
+  "subtitle": "Edición sintética para validar la publicación web institucional",
+  "description": "Fixture sin hechos reales, usado para comprobar navegación, diseño, versiones y controles de publicación.",
+  "version": "0.1.0",
+  "cutoff": "2026-08-01",
+  "published_at": "2026-08-01T18:30:00-06:00",
+  "status": "piloto verificable",
+  "classification": "public",
+  "publication_approved": true,
+  "content_notice": "Todos los nombres, cifras y eventos de esta edición son sintéticos. No representa una publicación institucional real.",
+  "summary": "Esta edición comprueba el recorrido completo desde un contrato aprobado hasta el portal, la versión inmutable y la ruta de última publicación.",
+  "highlights": [
+    {
+      "label": "Contrato",
+      "value": "Validado",
+      "detail": "Campos públicos y fuentes permitidas"
+    },
+    {
+      "label": "Edición",
+      "value": "Inmutable",
+      "detail": "Ruta fechada con versión"
+    },
+    {
+      "label": "Entrega",
+      "value": "Shadow",
+      "detail": "Sin cambios en correo o PDF"
+    }
+  ],
+  "sections": [
+    {
+      "id": "panorama",
+      "title": "Panorama de la edición",
+      "eyebrow": "Lectura inicial",
+      "blocks": [
+        {
+          "type": "lead",
+          "text": "El publicador conserva la lógica documental existente y sustituye únicamente la última milla cuando una edición supera las validaciones." 
+        },
+        {
+          "type": "paragraph",
+          "text": "El contenido de este fixture es deliberadamente sintético. Su función es demostrar la estructura editorial, la navegación y la trazabilidad sin exponer fuentes de trabajo ni datos internos."
+        },
+        {
+          "type": "callout",
+          "label": "Regla de publicación",
+          "text": "Un candidato no puede llegar al portal mientras conserve campos privados, rutas locales, correos, secretos o una clasificación distinta de public."
+        }
+      ]
+    },
+    {
+      "id": "controles",
+      "title": "Controles antes de publicar",
+      "eyebrow": "Puerta fail-closed",
+      "blocks": [
+        {
+          "type": "table",
+          "caption": "Controles mínimos de una edición pública",
+          "headers": ["Control", "Resultado esperado", "Bloqueo"],
+          "rows": [
+            ["Clasificación", "Publicación aprobada", "Candidato o restringido"],
+            ["Contenido", "Sin rutas ni datos personales", "Coincidencia sensible"],
+            ["Fuentes", "HTTPS y dominio permitido", "Origen no autorizado"],
+            ["Versión", "Corte y versión únicos", "Colisión de edición"]
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Construcción en directorio temporal.",
+            "Validación del manifiesto antes de promover latest.",
+            "Hash público del contenido aprobado.",
+            "Versión previa conservada para reversión."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transicion",
+      "title": "Transición de la última milla",
+      "eyebrow": "Sin interrupción",
+      "blocks": [
+        {
+          "type": "timeline",
+          "items": [
+            {"label": "01", "title": "Detectar", "text": "La tarea vigente revisa fuentes y determina si existe un cambio verificable."},
+            {"label": "02", "title": "Validar", "text": "LaTeX, PDF y QA continúan operando sin modificación durante el piloto."},
+            {"label": "03", "title": "Adaptar", "text": "El resultado aprobado se convierte en un candidato web fuera del repositorio."},
+            {"label": "04", "title": "Publicar", "text": "Sólo un contrato público aprobado genera latest y una versión inmutable."}
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "label": "Diario Oficial de la Federación",
+      "url": "https://www.dof.gob.mx/",
+      "institution": "Gobierno de México"
+    },
+    {
+      "label": "Sistema de Información del Diario Oficial",
+      "url": "https://sidof.segob.gob.mx/",
+      "institution": "Secretaría de Gobernación"
+    },
+    {
+      "label": "Secretaría de Energía",
+      "url": "https://www.gob.mx/sener",
+      "institution": "Secretaría de Energía"
+    }
+  ],
+  "optional_pdf": null,
+  "review": {
+    "approved_by": "fixture-ci",
+    "approved_at": "2026-08-01T18:20:00-06:00",
+    "basis": "Contenido sintético para pruebas automatizadas"
+  }
+}
+

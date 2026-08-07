@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://informes.example.invalid/schemas/editorial-components.schema.json",
+  "title": "Contrato de componentes editoriales DGMESNIE",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "cover", "sections"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "cover": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variant", "title", "cutoff", "version"],
+      "properties": {
+        "variant": { "enum": ["year-mask", "editorial-image", "minimal"] },
+        "title": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "subtitle": { "type": "string", "maxLength": 280 },
+        "year": { "type": "string", "pattern": "^[0-9]{4}$" },
+        "image_asset": { "type": "string", "pattern": "^/assets/[A-Za-z0-9._/-]+$" },
+        "image_alt": { "type": "string", "maxLength": 240 },
+        "cutoff": { "type": "string", "format": "date" },
+        "version": { "type": "string", "pattern": "^[A-Za-z0-9._-]+$" }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "blocks"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "number": { "type": "string", "maxLength": 8 },
+          "title": { "type": "string", "minLength": 1, "maxLength": 180 },
+          "level": { "enum": [1, 2] },
+          "blocks": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/block" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "url"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1, "maxLength": 220 },
+        "url": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "accessed_on": { "type": "string", "format": "date" }
+      }
+    },
+    "block": {
+      "oneOf": [
+        { "$ref": "#/$defs/narrative" },
+        { "$ref": "#/$defs/quote" },
+        { "$ref": "#/$defs/callout" },
+        { "$ref": "#/$defs/kpis" },
+        { "$ref": "#/$defs/table" },
+        { "$ref": "#/$defs/chart" },
+        { "$ref": "#/$defs/map" },
+        { "$ref": "#/$defs/figure" },
+        { "$ref": "#/$defs/timeline" },
+        { "$ref": "#/$defs/flow" },
+        { "$ref": "#/$defs/video" },
+        { "$ref": "#/$defs/footnotes" },
+        { "$ref": "#/$defs/links" }
+      ]
+    },
+    "narrative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "text"],
+      "properties": {
+        "type": { "const": "paragraph" },
+        "text": { "type": "string", "minLength": 1 },
+        "columns": { "enum": [1, 2] }
+      }
+    },
+    "quote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "text", "source"],
+      "properties": {
+        "type": { "const": "quote" },
+        "text": { "type": "string", "minLength": 1 },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+    "callout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "tone", "title", "text"],
+      "properties": {
+        "type": { "const": "callout" },
+        "tone": { "enum": ["note", "warning", "decision", "impact"] },
+        "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "text": { "type": "string", "minLength": 1 }
+      }
+    },
+    "kpis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "kpi-grid" },
+        "items": {
+          "type": "array", "minItems": 1, "maxItems": 6,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["label", "value"],
+            "properties": {
+              "label": { "type": "string", "minLength": 1, "maxLength": 80 },
+              "value": { "type": ["string", "number"] },
+              "unit": { "type": "string", "maxLength": 24 },
+              "detail": { "type": "string", "maxLength": 180 }
+            }
+          }
+        }
+      }
+    },
+    "table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "caption", "columns", "rows", "source"],
+      "properties": {
+        "type": { "const": "table" },
+        "caption": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "columns": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 } },
+        "rows": { "type": "array", "minItems": 1, "items": { "type": "array", "items": { "type": ["string", "number", "null"] } } },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+    "chart": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "chart_type", "title", "categories", "series", "source"],
+      "properties": {
+        "type": { "const": "chart" },
+        "chart_type": { "enum": ["bar", "horizontal-bar", "line", "area", "mixed", "donut", "sankey"] },
+        "title": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "categories": { "type": "array", "items": { "type": ["string", "number"] } },
+        "series": { "type": "array", "minItems": 1 },
+        "source": { "$ref": "#/$defs/source" },
+        "table_fallback": { "type": "boolean", "const": true }
+      }
+    },
+    "map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "geometry", "regions", "source"],
+      "properties": {
+        "type": { "const": "map" },
+        "geometry": { "enum": ["gcr", "states", "custom-public"] },
+        "regions": { "type": "array", "minItems": 1 },
+        "source": { "$ref": "#/$defs/source" },
+        "table_fallback": { "type": "boolean", "const": true }
+      }
+    },
+    "figure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "asset", "alt", "caption", "source"],
+      "properties": {
+        "type": { "const": "figure" },
+        "asset": { "type": "string", "pattern": "^/assets/[A-Za-z0-9._/-]+$" },
+        "alt": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "caption": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "events"],
+      "properties": {
+        "type": { "const": "timeline" },
+        "events": { "type": "array", "minItems": 2, "items": { "type": "object" } }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "nodes", "edges"],
+      "properties": {
+        "type": { "const": "flow" },
+        "direction": { "enum": ["LR", "TB"] },
+        "nodes": { "type": "array", "minItems": 2 },
+        "edges": { "type": "array", "minItems": 1 }
+      }
+    },
+    "video": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "title", "url", "source"],
+      "properties": {
+        "type": { "const": "video" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "url": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "source": { "$ref": "#/$defs/source" },
+        "print_fallback": { "enum": ["qr", "link-card"] }
+      }
+    },
+    "footnotes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "footnotes" },
+        "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source" } }
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "links" },
+        "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source" } }
+      }
+    }
+  }
+}

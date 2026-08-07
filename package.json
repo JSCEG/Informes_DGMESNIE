@@ -1,0 +1,35 @@
+{
+  "name": "informes-dgmesnie",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "adapt:radar": "node scripts/adapt-radar-regulatorio.mjs",
+    "shadow:radar": "node scripts/adapt-radar-regulatorio.mjs --output .shadow/radar-regulatorio.candidate.json",
+    "approve": "node scripts/approve-publicable.mjs",
+    "validate": "node scripts/validate-publicable.mjs",
+    "build": "node scripts/build-site.mjs",
+    "build:fixture": "node scripts/build-site.mjs --input fixtures/radar-regulatorio.publicable.json --output .shadow/fixture-dist --base-url https://informes.example.invalid --refresh-shell",
+    "build:local-draft": "node scripts/build-site.mjs --input .shadow/radar-regulatorio.local-draft.json --output dist --base-url https://local.informes.invalid",
+    "refresh:local-shell": "node scripts/build-site.mjs --input .shadow/radar-regulatorio.local-draft.json --output dist --base-url https://local.informes.invalid --refresh-shell",
+    "export:model:pdf": "node scripts/export-pdf.mjs --route /informes/modelo-editorial/ --output output/pdf/modelo-editorial.pdf --public-output dist/informes/modelo-editorial/modelo-editorial.pdf --title \"Informe modelo editorial\"",
+    "check:model:pdf": "node scripts/check-pdf.mjs --input output/pdf/modelo-editorial.pdf --title \"Informe modelo editorial\" --pages 22",
+    "export:radar:pdf": "node scripts/export-pdf.mjs --route /informes/radar-regulatorio-energetico/ --output output/pdf/radar-regulatorio-energetico.pdf --title \"Marco regulatorio\"",
+    "check:radar:pdf": "node scripts/check-pdf.mjs --input output/pdf/radar-regulatorio-energetico.pdf --title \"Marco regulatorio\"",
+    "check:dist": "node scripts/check-dist.mjs --output dist",
+    "serve": "node scripts/serve.mjs --root dist --port 4173",
+    "serve:fixture": "node scripts/serve.mjs --root .shadow/fixture-dist --port 4173",
+    "test": "node --test",
+    "check": "npm run test && npm run build:fixture && node scripts/check-dist.mjs --output .shadow/fixture-dist"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.0"
+  },
+  "dependencies": {
+    "echarts": "^6.1.0",
+    "qrcode-generator": "^2.0.4"
+  }
+}

@@ -1,0 +1,36 @@
+dist/
+.shadow/
+.publish-tmp-*/
+.env
+.env.*
+!.env.example
+*.dpapi
+*.pem
+*.pfx
+secrets/
+node_modules/
+.playwright-cli/
+.playwright-mcp/
+output/
+tmp/
+*standalone*.html
+
+# Capturas de trabajo de la revisión editorial.
+/modelo-*.png
+/radar-*.png
+
+# Del Sistema de Diseño sólo se versionan los activos que el publicador copia a
+# /assets. El resto vive en su propio repositorio y aquí sólo añadiría peso: el
+# arte original de portada pesa 10 MB y ya no se usa.
+Sistema de Diseño/*
+!Sistema de Diseño/assets/
+Sistema de Diseño/assets/*
+!Sistema de Diseño/assets/fonts/
+!Sistema de Diseño/assets/gcr-data.js
+!Sistema de Diseño/assets/lema_margarita_2026.png
+!Sistema de Diseño/assets/logo_gob.png
+!Sistema de Diseño/assets/logo_sener.png
+!Sistema de Diseño/assets/mujer.png
+!Sistema de Diseño/assets/portada_marco_regulatorio_foto.jpg
+!Sistema de Diseño/assets/reno_anexos.png
+!Sistema de Diseño/assets/reno_portada.png
