@@ -1,10 +1,14 @@
 import { spawn } from 'node:child_process';
-import { open, stat } from 'node:fs/promises';
+import { open, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs, requireArg } from './lib/args.mjs';
 
 const args = parseArgs();
-const input = path.resolve(requireArg(args, 'input'));
+// La corrida nombra el PDF con corte y versión; el auditor guarda esa ruta para
+// que la validación no tenga que adivinarla.
+const input = args['from-audit']
+  ? path.resolve(JSON.parse(await readFile(path.resolve(String(args['from-audit'])), 'utf8')).output)
+  : path.resolve(requireArg(args, 'input'));
 const expectedTitle = args.title ? String(args.title) : null;
 const expectedPages = args.pages ? Number(args.pages) : null;
 const info = await stat(input);

@@ -13,6 +13,8 @@ export function adaptMarkdown(markdown, { sourceName = 'documento.md' } = {}) {
     subtitle: cleanInline(metadata.subtitulo || ''),
     sourceVersion: metadata.version || null,
     sourceDate: metadata.fecha || null,
+    semver: toSemver(metadata.version),
+    isoDate: toIsoDate(metadata.fecha),
     sections,
     sources,
     privateProvenance: {
@@ -124,6 +126,27 @@ function parseMermaidFlow(lines) {
 }
 
 const LINK_PATTERN = /\[([^\]]+)]\((https:\/\/[^\s)]+?)\)/g;
+
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+// El resultado canónico ya declara su versión y su fecha de corte. Derivarlas de
+// ahí evita que la tarea programada tenga que repetirlas en cada corrida.
+export function toSemver(value) {
+  const raw = String(value ?? '').trim();
+  const match = raw.match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/);
+  if (!match) return null;
+  return `${match[1]}.${match[2] ?? '0'}.${match[3] ?? '0'}`;
+}
+
+export function toIsoDate(value) {
+  const raw = String(value ?? '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const match = raw.toLowerCase().match(/^(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})$/);
+  if (!match) return null;
+  const month = MESES.indexOf(match[2].normalize('NFD').replace(/[̀-ͯ]/g, ''));
+  if (month < 0) return null;
+  return `${match[3]}-${String(month + 1).padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+}
 
 function cleanInline(text) {
   return text.replace(/\[([^\]]+)]\([^)]+\)/g, '$1').replace(/[*_`]/g, '').replace(/\s+/g, ' ').trim();

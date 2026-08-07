@@ -8,11 +8,17 @@ import { parseArgs } from './lib/args.mjs';
 const args = parseArgs();
 const root = path.resolve(args.root || 'dist');
 const route = String(args.route || '/informes/modelo-editorial/');
-const output = path.resolve(args.output || 'output/pdf/modelo-editorial.pdf');
+const requestedOutput = path.resolve(args.output || 'output/pdf/modelo-editorial.pdf');
 const publicOutput = args['public-output'] ? path.resolve(String(args['public-output'])) : null;
 const port = Number(args.port || 4199);
 const expectedTitle = String(args.title || 'Informe modelo editorial');
-const auditPath = output.replace(/\.pdf$/i, '.audit.json');
+// El auditor conserva una ruta fija aunque el PDF lleve corte y versión, para
+// que la validación posterior sepa qué archivo produjo la corrida.
+const auditPath = requestedOutput.replace(/\.pdf$/i, '.audit.json');
+// Con --versioned cada corrida deja su propio archivo y no pisa la anterior.
+const output = args.versioned
+  ? requestedOutput.replace(/\.pdf$/i, `-${await releaseSuffix(root, route)}.pdf`)
+  : requestedOutput;
 
 if (!route.startsWith('/') || route.includes('..') || route.includes('\\')) throw new Error('--route debe ser una ruta pública absoluta y segura.');
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('--port debe ser un puerto local válido.');
@@ -247,6 +253,16 @@ async function addInternalLinks(filePath, links) {
   }
   await writeFile(filePath, await document.save());
   return { internal_links: added, skipped };
+}
+
+// El identificador de edición del manifiesto ya combina corte y versión, y es
+// el mismo que nombra la ruta inmutable del sitio.
+async function releaseSuffix(siteRoot, reportRoute) {
+  const manifestPath = path.join(siteRoot, reportRoute.replace(/^\/+/, ''), 'manifest.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  const release = String(manifest.release_id ?? '').trim();
+  if (!/^[A-Za-z0-9._-]+$/.test(release)) throw new Error(`El manifiesto no declara un release_id utilizable: "${release}".`);
+  return release;
 }
 
 async function waitForServer(url) {
