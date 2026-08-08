@@ -26,8 +26,8 @@
     "check": "npm run test && npm run build:fixture && node scripts/check-dist.mjs --output .shadow/fixture-dist",
     "build:map:asset": "node scripts/build-map-asset.mjs --input \"C:/Users/User/Documents/Codex/Documentos latex/10_Informe_PODECOBI/data/embedded_estados.geojson\" --output config/mexico-estados.json",
     "build:internal": "node scripts/build-internal.mjs",
-    "export:podecobi:pdf": "node scripts/export-pdf.mjs --root .shadow/interno --route /informes/podecobi/ --output output/pdf/podecobi.pdf --title \"Polos de Desarrollo\" --versioned",
-    "check:podecobi:pdf": "node scripts/check-pdf.mjs --from-audit output/pdf/podecobi.audit.json --title \"Polos de Desarrollo\""
+    "export:podecobi:pdf": "node scripts/export-pdf.mjs --root .shadow/interno --route /informes/podecobi/ --output output/pdf/Informe_PODECOBI_DGMESNIE.pdf --title \"Polos de Desarrollo\" --versioned",
+    "check:podecobi:pdf": "node scripts/check-pdf.mjs --from-audit output/pdf/Informe_PODECOBI_DGMESNIE.audit.json --title \"Polos de Desarrollo\""
   },
   "devDependencies": {
     "pdf-lib": "^1.17.1",

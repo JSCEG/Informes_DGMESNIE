@@ -177,16 +177,20 @@ html.is-paginating main { visibility: hidden; }
 .polo-avance i { height: 8px; display: block; background: var(--paper-deep); }
 .polo-avance b { height: 100%; display: block; background: var(--wine); }
 .polo-avance strong { font: 700 13px var(--mono); }
-.polo-vocaciones h3, .polo-grupo h3 { margin: 0 0 10px; color: var(--wine); font: 700 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.polo-vocaciones h3, .polo-grupo h3 { margin: 0 0 10px; color: var(--wine); font: 700 11.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
 .polo-vocaciones ul { margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
 .polo-vocaciones li { padding: 5px 11px; background: var(--paper-deep); border: 1px solid var(--line); font-size: 12px; }
 .polo-grupo dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 26px; }
-.polo-grupo dt { color: var(--muted); font: 700 8.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.polo-grupo dt { color: var(--muted); font: 700 9.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
 .polo-grupo dd { margin: 3px 0 0; font-size: 13px; }
 .reader-paged .polo-ficha { gap: 16px; }
 .reader-paged .polo-encabezado h2 { font-size: 27px; }
-.reader-paged .polo-cifras strong { font-size: 20px; }
-.reader-paged .polo-grupo dd, .reader-paged .polo-vocaciones li { font-size: 11px; }
+.reader-paged .polo-cifras strong { font-size: 22px; }
+/* La ficha se lee impresa: 11 px quedaba por debajo de lo cómodo. */
+.reader-paged .polo-ficha .polo-grupo dd { font-size: 13.5px; line-height: 1.45; }
+.reader-paged .polo-vocaciones ul li { font-size: 12.5px; }
+.reader-paged .polo-map-datos dd { font-size: 13px; }
+.reader-paged .polo-cifras p { font-size: 11.5px; }
 
 /* Mapa del polo: polígono declarado, barra de escala y localizador nacional. */
 .polo-map-figure { margin: 26px 0; }
