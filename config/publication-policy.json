@@ -10,6 +10,9 @@
     "ribbon",
     "editorial-image"
   ],
+  "internal_report_ids": [
+    "podecobi-dgmesnie"
+  ],
   "allowed_source_hosts": [
     "dof.gob.mx",
     "www.dof.gob.mx",

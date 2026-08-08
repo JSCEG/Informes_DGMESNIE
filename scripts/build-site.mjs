@@ -28,6 +28,11 @@ try {
   const { contract, raw } = await loadContract(input);
   const policy = await loadPolicy();
   assertValidContract(contract, policy, { mode: 'publish', raw });
+  // Barrera dura: un informe interno puede llevar datos de contacto, así que no
+  // entra al sitio público por ninguna vía. Su salida es el PDF que se envía.
+  if (contract.classification === 'internal') {
+    throw new Error('Este informe es de distribución interna y no se publica en el sitio. Use scripts/build-internal.mjs.');
+  }
   const manifest = sanitizePublicManifest(contract, baseUrl);
   const id = releaseId(contract);
   const existingVersionRoot = path.join(output, 'informes', contract.slug, 'versiones');

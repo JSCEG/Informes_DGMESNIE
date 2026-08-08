@@ -24,7 +24,8 @@
     "serve:fixture": "node scripts/serve.mjs --root .shadow/fixture-dist --port 4173",
     "test": "node --test",
     "check": "npm run test && npm run build:fixture && node scripts/check-dist.mjs --output .shadow/fixture-dist",
-    "build:map:asset": "node scripts/build-map-asset.mjs --input \"C:/Users/User/Documents/Codex/Documentos latex/10_Informe_PODECOBI/data/embedded_estados.geojson\" --output config/mexico-estados.json"
+    "build:map:asset": "node scripts/build-map-asset.mjs --input \"C:/Users/User/Documents/Codex/Documentos latex/10_Informe_PODECOBI/data/embedded_estados.geojson\" --output config/mexico-estados.json",
+    "build:internal": "node scripts/build-internal.mjs"
   },
   "devDependencies": {
     "pdf-lib": "^1.17.1",

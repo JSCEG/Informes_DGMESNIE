@@ -3,6 +3,9 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const WINDOWS_PATH = /(?:[A-Za-z]:\\|\\\\)[^\s"']+/;
+// Los datos de contacto sólo se admiten en informes de distribución interna, que
+// nunca llegan al sitio público. Todo lo demás queda bloqueado siempre.
+const CONTACT_RULES = new Set(['correo electrónico']);
 const SENSITIVE_TEXT = [
   { label: 'ruta local', pattern: WINDOWS_PATH },
   { label: 'ruta file://', pattern: /file:\/\//i },
@@ -78,8 +81,17 @@ export function validateContract(contract, policy, { mode = 'publish', raw = JSO
   if (!Array.isArray(contract.sources)) errors.push('sources debe ser una lista.');
   if ((contract.sources?.length ?? 0) > policy.max_sources) errors.push('El contrato excede el máximo de fuentes.');
 
+  // Un informe interno se distribuye por correo a una lista nombrada y nunca se
+  // publica en el sitio. Es la única figura que admite datos de contacto, y a
+  // cambio queda excluida de la publicación web por el propio publicador.
+  const isInternal = contract.classification === 'internal';
+  if (isInternal) {
+    if (!(policy.internal_report_ids ?? []).includes(contract.report_id)) errors.push('Este informe no está autorizado como interno en la política.');
+    if (contract.publication_scope !== 'internal-distribution') errors.push('Un informe interno debe declarar publication_scope internal-distribution.');
+  }
+
   if (mode === 'publish') {
-    if (contract.classification !== 'public') errors.push('La clasificación debe ser public.');
+    if (!isInternal && contract.classification !== 'public') errors.push('La clasificación debe ser public o internal.');
     if (contract.publication_approved !== true) errors.push('publication_approved debe ser true.');
     if (!contract.review || typeof contract.review.approved_by !== 'string' || !contract.review.approved_by.trim()) errors.push('Falta la aprobación editorial.');
   }
@@ -115,6 +127,7 @@ export function validateContract(contract, policy, { mode = 'publish', raw = JSO
     if (policy.forbidden_field_names.includes(key)) errors.push(`Campo prohibido: ${keys.join('.')}.`);
     if (typeof value === 'string') {
       for (const rule of SENSITIVE_TEXT) {
+        if (isInternal && CONTACT_RULES.has(rule.label)) continue;
         if (rule.pattern.test(value)) errors.push(`Contenido bloqueado (${rule.label}) en ${keys.join('.') || 'raíz'}.`);
       }
       return;
