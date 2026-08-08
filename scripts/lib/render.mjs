@@ -100,7 +100,6 @@ function renderEditorialCover(contract, manifest, { topLevelSections, contentSec
       </div>
       <div class="regulatory-cover-foot">
         <p class="regulatory-cover-unit"><b>DGMESNIE</b><span>Dirección General de Metodologías y Estadísticas del Sistema Nacional de Información Energética</span></p>
-        ${contract.classification === 'internal' ? '<p class="regulatory-cover-aviso">Documento de circulación interna · no publicar</p>' : ''}
         <dl class="regulatory-cover-meta">
           <div><dt>Corte documental</dt><dd>${escapeHtml(contract.cutoff)}</dd></div>
           <div><dt>Versión</dt><dd>${escapeHtml(contract.version)}</dd></div>
@@ -500,7 +499,7 @@ function renderSourcePages(sources, indexedUrls = new Set()) {
   const deck = indexed
     ? `Las otras ${indexed} fuentes de esta edición están enlazadas en su lugar y reunidas en el capítulo de ligas de interés. El manifiesto público conserva las ${sources.length}.`
     : 'Enlaces oficiales preservados en el contrato publicable de esta edición.';
-  return `<section class="sources" data-flow-list data-flow-label="Trazabilidad pública"><p class="eyebrow" data-flow-counter>Trazabilidad pública</p><h2>Fuentes citadas fuera del índice de ligas</h2><p class="sources-deck" data-flow-deck>${escapeHtml(deck)}</p><ol>${items}</ol></section>`;
+  return `<section class="sources" data-flow-list data-flow-label="Trazabilidad pública"><p class="eyebrow" data-flow-counter>Trazabilidad pública</p><h2>${indexed ? 'Fuentes citadas fuera del índice de ligas' : 'Fuentes consultables'}</h2><p class="sources-deck" data-flow-deck>${escapeHtml(deck)}</p><ol>${items}</ol></section>`;
 }
 
 function renderBlock(block) {
@@ -748,13 +747,36 @@ function renderUnifilar(block) {
   // El lienzo usa centímetros del original multiplicados por cien.
   const px = (x) => (740 + x * 100).toFixed(0);
   const py = (y) => (470 - y * 100).toFixed(0);
-  const caja = (x, y, width, height, className, lines) => {
+  // El texto se ajusta a la caja: primero se reparte en renglones y, si aun así
+  // el más largo se sale, se reduce el cuerpo. Antes los nombres largos de polo
+  // se desbordaban del rectángulo.
+  const fit = (text, boxWidth, baseSize = 24, maxLines = 2) => {
+    const words = String(text).split(/\s+/).filter(Boolean);
+    const budget = Math.max(6, Math.floor((boxWidth * 100 - 24) / (baseSize * 0.56)));
+    const lines = [];
+    for (const word of words) {
+      const current = lines.at(-1);
+      if (!current || `${current} ${word}`.length > budget) lines.push(word);
+      else lines[lines.length - 1] = `${current} ${word}`;
+    }
+    while (lines.length > maxLines) lines.splice(maxLines - 1, 2, `${lines[maxLines - 1]} ${lines[maxLines]}`);
+    const longest = Math.max(1, ...lines.map((line) => line.length));
+    const size = Math.min(baseSize, (boxWidth * 100 - 24) / (longest * 0.56));
+    return { lines, size };
+  };
+
+  const caja = (x, y, width, height, className, entries) => {
     const left = px(x - width / 2);
     const top = py(y + height / 2);
-    const first = y + height / 2 - 0.42 - (lines.length - 1) * 0.15;
-    return `<g class="${className}"><rect x="${left}" y="${top}" width="${(width * 100).toFixed(0)}" height="${(height * 100).toFixed(0)}" rx="7"/>` +
-      lines.map((line, index) => `<text class="${line.className}" x="${px(x)}" y="${py(first - index * 0.3)}" text-anchor="middle">${escapeHtml(line.text)}</text>`).join('') +
-      '</g>';
+    const rendered = entries.map((entry) => ({ ...entry, ...fit(entry.text, width, entry.size, entry.maxLines ?? 2) }));
+    const total = rendered.reduce((count, entry) => count + entry.lines.length, 0);
+    let cursor = y + height / 2 - 0.40 - (total - 1) * 0.145;
+    const text = rendered.map((entry) => entry.lines.map((line) => {
+      const element = `<text class="${entry.className}" x="${px(x)}" y="${py(cursor)}" style="font-size:${entry.size.toFixed(1)}px" text-anchor="middle">${escapeHtml(line)}</text>`;
+      cursor -= 0.29;
+      return element;
+    }).join('')).join('');
+    return `<g class="${className}"><rect x="${left}" y="${top}" width="${(width * 100).toFixed(0)}" height="${(height * 100).toFixed(0)}" rx="7"/>${text}</g>`;
   };
 
   const columnas = [
@@ -763,8 +785,8 @@ function renderUnifilar(block) {
   ];
 
   const nodos = columnas.map(({ x, source, className }) => caja(x, 3.7, 4.25, 1.18, className, [
-    { text: source.label ?? '', className: 'unifilar-label' },
-    ...(source.detail ? [{ text: source.detail, className: 'unifilar-detalle' }] : [])
+    { text: source.label ?? '', className: 'unifilar-label', size: 27 },
+    ...(source.detail ? [{ text: source.detail, className: 'unifilar-detalle', size: 22 }] : [])
   ])).join('');
 
   // La ruta alterna no comparte el bus: baja punteada y entra al polo por un
@@ -790,8 +812,8 @@ function renderUnifilar(block) {
     `<path class="unifilar-red" d="M ${px(0)} ${py(0.62)} L ${px(0)} ${py(0.38)}"/>`;
 
   const polo = caja(0, -0.35, 6.5, 1.45, 'unifilar-polo', [
-    { text: block.polo ?? '', className: 'unifilar-polo-label' },
-    ...(block.state ? [{ text: block.state, className: 'unifilar-detalle' }] : [])
+    { text: block.polo ?? '', className: 'unifilar-polo-label', size: 31, maxLines: 3 },
+    ...(block.state ? [{ text: block.state, className: 'unifilar-detalle', size: 22 }] : [])
   ]);
 
   const posiciones = metrics.length === 3 ? [-4, 0, 4] : metrics.length === 2 ? [-2.2, 2.2] : [0];
@@ -803,8 +825,8 @@ function renderUnifilar(block) {
 
   const cifras = metrics.map((metric, index) => caja(posiciones[index], -3.12, 3.55, 1.18,
     metric.variant === 'madura' ? 'unifilar-madura' : 'unifilar-kpi', [
-      { text: metric.value ?? '', className: 'unifilar-cifra' },
-      { text: metric.label ?? '', className: 'unifilar-detalle' }
+      { text: metric.value ?? '', className: 'unifilar-cifra', size: 34 },
+      { text: metric.label ?? '', className: 'unifilar-detalle', size: 22 }
     ])).join('');
 
   const descripcion = [

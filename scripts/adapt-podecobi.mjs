@@ -37,7 +37,6 @@ try {
   const stages = tally(inventory.map((polo) => polo.stage).filter(Boolean));
   const states = new Set(inventory.map((polo) => polo.state).filter(Boolean));
 
-  const byState = tally(inventory.map((polo) => polo.state).filter(Boolean));
   const bySurface = [...inventory]
     .filter((polo) => Number.isFinite(Number(polo.official_area_ha)))
     .sort((left, right) => Number(right.official_area_ha) - Number(left.official_area_ha));
@@ -80,12 +79,22 @@ try {
         source: 'Etapa registrada en el inventario maestro.',
         items: [...stages].map(([stage, count]) => ({ label: stage, value: count, display: String(count) }))
       },
+      // Una barra por entidad no dice nada cuando cada entidad tiene un polo:
+      // se sustituye por la demanda máxima, que sí distingue entre ellos.
       {
         type: 'chart-bars',
-        eyebrow: 'Entidades',
-        caption: 'Polos por entidad federativa',
-        source: 'Entidad declarada en el inventario maestro.',
-        items: byState.map(([state, count]) => ({ label: state, value: count, display: String(count) }))
+        eyebrow: 'Demanda',
+        caption: 'Demanda eléctrica máxima declarada por polo',
+        source: 'Demanda máxima del inventario maestro; se omiten los polos que no la declaran en cifra.',
+        items: inventory
+          .map((polo) => ({ polo, mw: parseMegawatts(polo.maximum_demand) }))
+          .filter((entry) => entry.mw !== null)
+          .sort((left, right) => right.mw - left.mw)
+          .map(({ polo, mw }) => ({
+            label: `${polo.num ?? ''} ${polo.official_name ?? ''}`.trim(),
+            value: mw,
+            display: polo.maximum_demand
+          }))
       }
     ]
   });
@@ -95,14 +104,20 @@ try {
     blocks: [{
       type: 'table',
       caption: `Universo oficial al ${cutoff}`,
-      headers: ['Núm.', 'Polo', 'Entidad', 'Municipio', 'Declaratoria', 'Superficie ha', 'Etapa'],
+      // Hay exactamente un polo por entidad, así que una columna sólo para la
+      // entidad no distingue nada: se funde con el municipio y el espacio pasa
+      // a la demanda y al avance, que sí varían y están completos en los
+      // catorce registros. Inversión y empleos no sirven aquí: sólo dos
+      // registros declaran inversión y ninguno declara empleos.
+      headers: ['Núm.', 'Polo', 'Ubicación', 'Declaratoria', 'Superficie ha', 'Demanda máx.', 'Avance', 'Etapa'],
       rows: inventory.map((polo) => [
         polo.num ?? '',
         polo.declaration_url ? linked(polo.official_name, polo.declaration_url) : (polo.official_name ?? ''),
-        polo.state ?? '',
-        polo.municipality ?? '',
+        [polo.municipality, polo.state].filter(Boolean).join(', '),
         polo.declaration_date ?? '',
         formatArea(polo.official_area_ha),
+        polo.maximum_demand ?? '',
+        Number.isFinite(Number(polo.progress_manual_pct)) ? `${polo.progress_manual_pct}%` : '',
         polo.stage ?? ''
       ])
     }]
@@ -376,6 +391,16 @@ function latestCutoff(inventory) {
   const dates = inventory.map((polo) => polo.verified_on).filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value ?? ''));
   if (!dates.length) throw new Error('El inventario no declara fechas de verificación; indique --cutoff.');
   return dates.sort().at(-1);
+}
+
+// Sólo se grafica lo que viene en cifra. Un rango como «3.3–5.6 MW» se resuelve
+// con su extremo superior, que es el valor que la propia ficha reporta como
+// máximo; si no hay número, el polo no entra a la gráfica.
+function parseMegawatts(value) {
+  const numbers = String(value ?? '').match(/d+(?:[.,]d+)?/g);
+  if (!numbers) return null;
+  const parsed = numbers.map((number) => Number(number.replace(',', '.'))).filter(Number.isFinite);
+  return parsed.length ? Math.max(...parsed) : null;
 }
 
 function formatArea(value) {
