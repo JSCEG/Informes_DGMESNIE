@@ -157,6 +157,58 @@ html.is-paginating main { visibility: hidden; }
 .report-content > .report-topic { padding: 48px 0; border-bottom: 1px solid var(--line); }
 .report-content > .report-topic:first-child { padding-top: 8px; }
 .report-content > .report-topic:last-child { border-bottom: 0; }
+/* Ficha de polo: identificación, cifras ancla y datos documentales. */
+.polo-ficha { margin: 24px 0; display: grid; gap: 22px; }
+/* Colocación explícita: con autoflujo la insignia de etapa se apropiaba de la
+   primera columna y empujaba el nombre del polo a la derecha. */
+.polo-encabezado { padding-bottom: 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 20px; align-items: end; border-bottom: 2px solid var(--wine); }
+.polo-encabezado > div { grid-area: 1 / 1; display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.polo-numero { color: var(--wine); font: 700 13px var(--mono); }
+.polo-encabezado h2 { margin: 0; font-size: clamp(26px, 3.2vw, 38px); }
+.polo-ubicacion { grid-area: 2 / 1; margin: 0; color: var(--muted); font-size: 13px; }
+.polo-etapa { grid-area: 1 / 2 / span 2 / auto; align-self: center; justify-self: end; padding: 6px 12px; color: var(--ink); background: var(--gold); font: 700 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.polo-cifras { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.polo-cifras article { padding: 14px 16px; background: var(--white); border: 1px solid var(--line); border-top: 2px solid var(--wine); }
+.polo-cifras span { color: var(--muted); font: 700 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.polo-cifras strong { display: block; margin-top: 6px; font: 400 26px var(--serif); }
+.polo-cifras p { margin: 4px 0 0; color: var(--faint); font-size: 11px; }
+.polo-avance { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.polo-avance span { color: var(--muted); font: 700 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.polo-avance i { height: 8px; display: block; background: var(--paper-deep); }
+.polo-avance b { height: 100%; display: block; background: var(--wine); }
+.polo-avance strong { font: 700 13px var(--mono); }
+.polo-vocaciones h3, .polo-grupo h3 { margin: 0 0 10px; color: var(--wine); font: 700 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.polo-vocaciones ul { margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
+.polo-vocaciones li { padding: 5px 11px; background: var(--paper-deep); border: 1px solid var(--line); font-size: 12px; }
+.polo-grupo dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 26px; }
+.polo-grupo dt { color: var(--muted); font: 700 8.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.polo-grupo dd { margin: 3px 0 0; font-size: 13px; }
+.reader-paged .polo-ficha { gap: 16px; }
+.reader-paged .polo-encabezado h2 { font-size: 27px; }
+.reader-paged .polo-cifras strong { font-size: 20px; }
+.reader-paged .polo-grupo dd, .reader-paged .polo-vocaciones li { font-size: 11px; }
+
+/* Unifilar: mismo trazo que el diagrama TikZ, con el texto seleccionable. */
+.unifilar-figure { margin: 28px 0; }
+.unifilar-figure > figcaption { padding: 12px 0; display: flex; justify-content: space-between; gap: 20px; border-top: 3px solid var(--gold); color: var(--muted); font-size: 11px; }
+.unifilar-figure > figcaption span { color: var(--wine); font: 800 9px var(--mono); letter-spacing: .11em; text-transform: uppercase; }
+.unifilar { width: 100%; height: auto; display: block; margin-top: 10px; }
+.unifilar rect, .unifilar circle { stroke-width: 1.6; }
+.unifilar-fuente rect, .unifilar-kpi rect { fill: #eaf3ef; stroke: #6fa89a; }
+.unifilar-alterna rect, .unifilar-madura rect { fill: #fbf2de; stroke: #cfa858; }
+.unifilar-polo rect { fill: var(--paper); stroke: #b9b2a9; stroke-width: 2; }
+.unifilar-switch { fill: var(--white); stroke: #b9b2a9; stroke-width: 1.6; }
+.unifilar-bobina { fill: var(--white); stroke: #9b2247; stroke-width: 1.8; }
+.unifilar-red { fill: none; stroke: #b9b2a9; stroke-width: 2.2; }
+.unifilar-red-alterna { stroke-dasharray: 10 8; }
+.unifilar-bus { fill: none; stroke: #6f6b66; stroke-width: 3.4; }
+.unifilar-bus-label { fill: var(--ink); font: 700 30px var(--sans); }
+.unifilar-label, .unifilar-polo-label { fill: var(--ink); font: 700 27px var(--sans); }
+.unifilar-polo-label { font-size: 31px; }
+.unifilar-alterna .unifilar-label { fill: var(--wine-dark); }
+.unifilar-detalle { fill: var(--muted); font: 400 22px var(--sans); }
+.unifilar-cifra { fill: var(--ink); font: 700 34px var(--sans); }
+
 .callout { margin: 32px 0; padding: 26px 28px; background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--gold); }
 .callout b { color: var(--wine); font: 700 10px var(--mono); text-transform: uppercase; }
 .callout p { margin: 8px 0 0; }

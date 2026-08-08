@@ -177,7 +177,9 @@ export function renderModelReport() {
     ['modelo-enlaces', '11', 'Enlaces oficiales'],
     ['modelo-mixta', '12', 'Gráfica mixta'],
     ['modelo-video', '13', 'Video integrado'],
-    ['modelo-ficha-tecnica', '14', 'Ficha técnica y créditos']
+    ['modelo-polo', '14', 'Ficha de polo'],
+    ['modelo-unifilar', '15', 'Esquema unifilar'],
+    ['modelo-ficha-tecnica', '16', 'Ficha técnica y créditos']
   ];
   const tocItems = toc.map(([id, number, title]) => `<li><a href="#${id}"><span>${number}</span><strong>${title}</strong><i></i><em>Abrir</em></a></li>`).join('');
   const running = (number, title) => `<div class="chapter-running-head"><a href="#contenido-modelo">${number} · ${title}</a><span>Muestrario local · datos ilustrativos</span></div>`;
@@ -223,7 +225,52 @@ export function renderModelReport() {
     <section class="report-section official-links-page" id="modelo-enlaces"><div class="section-number">11</div><div class="section-body">${running('11','Enlaces oficiales')}<p class="eyebrow">Consulta externa</p><h2>Links de interés</h2><p class="lead">Cada dirección es visible, clicable y abre una pestaña nueva. El destino nunca sustituye la fuente registrada en el informe.</p><div class="table-wrap interest-links-wrap"><table class="interest-links-table"><caption>Tabla 02. Portales públicos para consulta y seguimiento</caption><thead><tr><th>Recurso</th><th>Para qué consultarlo</th><th>Enlace</th></tr></thead><tbody><tr><td><b>SENER</b><span>Secretaría de Energía</span></td><td>Información, documentos y comunicados del sector.</td><td><a href="https://www.gob.mx/sener" target="_blank" rel="noopener noreferrer">gob.mx/sener ↗</a></td></tr><tr><td><b>DOF</b><span>Diario Oficial de la Federación</span></td><td>Publicaciones oficiales y ejemplares por fecha.</td><td><a href="https://www.dof.gob.mx/" target="_blank" rel="noopener noreferrer">dof.gob.mx ↗</a></td></tr><tr><td><b>SIDOF</b><span>Sistema de consulta del DOF</span></td><td>Búsqueda y seguimiento de disposiciones publicadas.</td><td><a href="https://sidof.segob.gob.mx/" target="_blank" rel="noopener noreferrer">sidof.segob.gob.mx ↗</a></td></tr><tr><td><b>SIE</b><span>Sistema de Información Energética</span></td><td>Series y datos públicos del sector energético.</td><td><a href="https://sie.energia.gob.mx/" target="_blank" rel="noopener noreferrer">sie.energia.gob.mx ↗</a></td></tr></tbody></table></div><aside class="callout note"><b>Regla editorial</b><p>En producción, cada URL debe provenir del contrato publicable y aprobarse en el gate antes de mostrarse.</p></aside></div></section>
     <section class="report-section mixed-chart-page" id="modelo-mixta"><div class="section-number">12</div><div class="section-body">${running('12','Gráfica mixta')}<p class="eyebrow">Visualización interactiva · ECharts</p><h2>Área, columnas y línea en una sola lectura</h2><p class="lead">La combinación permite comparar magnitud y tendencia sin sacrificar la alternativa tabular.</p><figure class="mixed-chart-figure"><figcaption><b>Gráfica 03.</b> Evolución ilustrativa de dos indicadores normalizados</figcaption><div id="model-mixed-chart" class="interactive-chart mixed-chart" role="img" aria-label="Gráfica mixta ilustrativa con columnas, área y línea"></div></figure><div class="chart-fallback"><table><caption>Alternativa tabular</caption><thead><tr><th>Periodo</th><th>Capacidad (índice)</th><th>Demanda (índice)</th></tr></thead><tbody><tr><td>2022</td><td>62</td><td>76</td></tr><tr><td>2023</td><td>71</td><td>79</td></tr><tr><td>2024</td><td>83</td><td>82</td></tr><tr><td>2025</td><td>91</td><td>86</td></tr><tr><td>2026</td><td>104</td><td>89</td></tr></tbody></table></div><p class="chart-source">Fuente: serie sintética para demostrar interacción, tooltip y lectura combinada.</p></div></section>
     <section class="report-section media-page" id="modelo-video"><div class="section-number">13</div><div class="section-body">${running('13','Video integrado')}<p class="eyebrow">Contenido audiovisual</p><h2>Video integrado con enlace alternativo</h2><p class="lead">El reproductor conserva proporción 16:9 dentro de la hoja y ofrece salida directa si el proveedor bloquea la inserción.</p><figure class="video-figure"><div class="video-frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/cEV_7ScE3yU" title="Video de referencia sobre acciones del sector eléctrico" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div><figcaption><b>Video 01.</b> Referencia pública de demostración. <a href="https://www.youtube.com/watch?v=cEV_7ScE3yU" target="_blank" rel="noopener noreferrer">Abrir en el sitio de origen ↗</a></figcaption></figure><aside class="callout warning"><b>Uso controlado</b><p>La versión final sólo incrusta videos con autorización, título accesible, procedencia pública y vínculo alternativo.</p></aside></div></section>
-    <section class="report-section technical-sheet-page" id="modelo-ficha-tecnica"><div class="section-number">14</div><div class="section-body">${running('14','Ficha técnica y créditos')}<p class="eyebrow">Control documental</p><h2>Ficha técnica de la edición</h2><p class="lead">La publicación cierra con los datos suficientes para citarla, reproducirla y comprobar cómo fue generada.</p><dl class="technical-metadata"><div><dt>Unidad responsable</dt><dd>DGMESNIE</dd></div><div><dt>Formato maestro</dt><dd>HTML semántico · CSS de impresión</dd></div><div><dt>Salida documental</dt><dd>PDF etiquetado · tamaño carta</dd></div><div><dt>Fuentes gráficas</dt><dd>Sistema de Diseño SENER</dd></div><div><dt>Datos de muestra</dt><dd>Sintéticos · no institucionales</dd></div><div><dt>Versión del modelo</dt><dd>1.0.0-modelo</dd></div></dl><div class="technical-grid"><article><p class="eyebrow">Cita sugerida</p><p>Secretaría de Energía (2026). <i>Informe modelo editorial para publicaciones web</i>. DGMESNIE.</p></article><article><p class="eyebrow">Créditos funcionales</p><ul><li>Coordinación editorial institucional</li><li>Validación de datos y fuentes</li><li>Diseño y publicación web</li><li>Aseguramiento de calidad</li></ul></article></div><aside class="callout note"><b>Regla de producción</b><p>Los informes particulares deben sustituir esta ficha con sus responsables, fuentes autorizadas, versión, corte, licencia y cita aprobada.</p></aside></div></section>`;
+    <section class="report-section polo-page" id="modelo-polo"><div class="section-number">14</div><div class="section-body">${running('14','Ficha de polo')}<p class="eyebrow">Componente territorial · datos oficiales</p><h2>Ficha de polo</h2>${renderPolo({
+      type: 'polo',
+      number: '01',
+      name: 'Seybaplaya I',
+      state: 'Campeche',
+      municipality: 'Seybaplaya',
+      stage: 'Preinversión',
+      substage: 'Preparación',
+      progress: 16,
+      metrics: [
+        { label: 'Superficie oficial', value: '99.99 ha', detail: 'Declaratoria del 30/06/2025' },
+        { label: 'Demanda eléctrica', value: '6 MW', detail: 'al 2030' },
+        { label: 'Demanda máxima', value: '10 MW', detail: 'al 2039' },
+        { label: 'Tensión', value: '115 kV' }
+      ],
+      activities: ['Logística', 'Agroindustria', 'Manufactura ligada a la industria energética', 'Otras industrias ligeras'],
+      groups: [
+        { title: 'Sustento documental', fields: [
+          { label: 'Declaratoria', value: { text: '30/06/2025 · DOF', runs: [{ t: '30/06/2025 · DOF', u: 'https://sidof.segob.gob.mx/notas/docFuente/5761459' }] } },
+          { label: 'Modificación', value: 'Sin modificación localizada' },
+          { label: 'Última revisión del proyecto', value: '16/02/2026' },
+          { label: 'Comité', value: '9 de junio de 2025 · 1ª Sesión Ordinaria' }
+        ] },
+        { title: 'Infraestructura', fields: [
+          { label: 'Interconexión', value: 'SE Samulá 80 MVA para primeros trenes; SE Seybaplaya 9.4 MVA requiere ampliación; apertura LT Lerma–Champotón 115 kV.' },
+          { label: 'Gas natural', value: 'Sin disponibilidad · demanda no cuantificada' },
+          { label: 'Ducto', value: 'Ducto Mayakán sin disponibilidad.' }
+        ] }
+      ]
+    })}<p class="chart-source">Fuente: inventario maestro PODECOBI, corte del 14 de julio de 2026. Los datos de contacto del registro no se publican.</p></div></section>
+    <section class="report-section unifilar-page" id="modelo-unifilar"><div class="section-number">15</div><div class="section-body">${running('15','Esquema unifilar')}<p class="eyebrow">Componente territorial · interconexión</p><h2>Esquema unifilar</h2><p class="lead">Sustituye al dibujo TikZ del flujo LaTeX. El texto queda seleccionable dentro del PDF y el archivo pesa una fracción de la imagen.</p>${renderUnifilar({
+      type: 'unifilar',
+      polo: 'PODECOBI Seybaplaya I',
+      state: 'Campeche',
+      sources: [
+        { label: 'SE Samulá', detail: '80 MVA · primeros trenes' },
+        { label: 'SE Seybaplaya', detail: '9.4 MVA · requiere ampliación' }
+      ],
+      alternate: { label: 'LT Lerma–Champotón', detail: '115 kV' },
+      metrics: [
+        { value: '6 MW', label: 'Demanda inicial' },
+        { value: '2030', label: 'Horizonte' },
+        { value: '10 MW', label: 'Demanda máxima', variant: 'madura' }
+      ]
+    })}<p class="chart-source">Fuente: inventario maestro PODECOBI, corte del 14 de julio de 2026. Los datos de contacto del registro no se publican.</p></div></section>
+    <section class="report-section technical-sheet-page" id="modelo-ficha-tecnica"><div class="section-number">16</div><div class="section-body">${running('16','Ficha técnica y créditos')}<p class="eyebrow">Control documental</p><h2>Ficha técnica de la edición</h2><p class="lead">La publicación cierra con los datos suficientes para citarla, reproducirla y comprobar cómo fue generada.</p><dl class="technical-metadata"><div><dt>Unidad responsable</dt><dd>DGMESNIE</dd></div><div><dt>Formato maestro</dt><dd>HTML semántico · CSS de impresión</dd></div><div><dt>Salida documental</dt><dd>PDF etiquetado · tamaño carta</dd></div><div><dt>Fuentes gráficas</dt><dd>Sistema de Diseño SENER</dd></div><div><dt>Datos de muestra</dt><dd>Sintéticos · no institucionales</dd></div><div><dt>Versión del modelo</dt><dd>1.0.0-modelo</dd></div></dl><div class="technical-grid"><article><p class="eyebrow">Cita sugerida</p><p>Secretaría de Energía (2026). <i>Informe modelo editorial para publicaciones web</i>. DGMESNIE.</p></article><article><p class="eyebrow">Créditos funcionales</p><ul><li>Coordinación editorial institucional</li><li>Validación de datos y fuentes</li><li>Diseño y publicación web</li><li>Aseguramiento de calidad</li></ul></article></div><aside class="callout note"><b>Regla de producción</b><p>Los informes particulares deben sustituir esta ficha con sus responsables, fuentes autorizadas, versión, corte, licencia y cita aprobada.</p></aside></div></section>`;
   return pageShell({
     title: model.title,
     description: 'Muestrario local y reutilizable del sistema editorial de Informes DGMESNIE.',
@@ -433,9 +480,125 @@ function renderBlock(block) {
   if (block.type === 'table') return `<figure class="table-figure"><figcaption><span>Cuadro comparativo</span>${escapeHtml(block.caption ?? 'Lectura estructurada de la información canónica')}</figcaption><div class="table-wrap"><table><thead><tr>${block.headers.map((cell) => `<th>${renderRich(cell)}</th>`).join('')}</tr></thead><tbody>${block.rows.map((row) => `<tr>${row.map((cell) => `<td>${renderRich(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></figure>`;
   if (block.type === 'timeline') return `<div class="timeline">${block.items.map((item) => `<article><span>${escapeHtml(item.label)}</span><div><h3>${renderRich(item.title)}</h3><p>${renderRich(item.text)}</p></div></article>`).join('')}</div>`;
   if (block.type === 'flow') return renderFlow(block);
+  if (block.type === 'polo') return renderPolo(block);
+  if (block.type === 'unifilar') return renderUnifilar(block);
   if (block.type === 'metrics') return `<div class="metrics-grid">${block.items.map((item) => `<article class="metric"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong><p>${escapeHtml(item.detail ?? '')}</p></article>`).join('')}</div>`;
   if (block.type === 'code') return `<pre><code>${escapeHtml(block.text)}</code></pre>`;
   return '';
+}
+
+// Ficha de un polo: identificación, cifras ancla, datos documentales y
+// vocaciones productivas. Los grupos y sus campos vienen del contrato, de modo
+// que el renderizador no decide qué se publica de cada registro.
+function renderPolo(block) {
+  const badge = block.stage ? `<span class="polo-etapa">${escapeHtml(block.stage)}${block.substage ? ` · ${escapeHtml(block.substage)}` : ''}</span>` : '';
+  const metrics = (block.metrics ?? []).map((metric) => `<article><span>${escapeHtml(metric.label ?? '')}</span><strong>${escapeHtml(metric.value ?? '')}</strong>${metric.detail ? `<p>${escapeHtml(metric.detail)}</p>` : ''}</article>`).join('');
+  const groups = (block.groups ?? []).map((group) => {
+    const rows = (group.fields ?? []).map((field) => `<div><dt>${escapeHtml(field.label ?? '')}</dt><dd>${renderRich(field.value)}</dd></div>`).join('');
+    return rows ? `<section class="polo-grupo"><h3>${escapeHtml(group.title ?? '')}</h3><dl>${rows}</dl></section>` : '';
+  }).join('');
+  const activities = (block.activities ?? []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+  const progress = Number.isFinite(block.progress) ? `<div class="polo-avance"><span>Avance reportado</span><i><b style="width:${Math.max(0, Math.min(100, block.progress))}%"></b></i><strong>${block.progress}%</strong></div>` : '';
+
+  return `<article class="polo-ficha">
+    <header class="polo-encabezado">
+      <div><span class="polo-numero">${escapeHtml(block.number ?? '')}</span><h2>${escapeHtml(block.name ?? '')}</h2></div>
+      <p class="polo-ubicacion">${escapeHtml([block.municipality, block.state].filter(Boolean).join(', '))}</p>
+      ${badge}
+    </header>
+    ${metrics ? `<div class="polo-cifras">${metrics}</div>` : ''}
+    ${progress}
+    ${activities ? `<section class="polo-vocaciones"><h3>Vocaciones productivas</h3><ul>${activities}</ul></section>` : ''}
+    ${groups}
+  </article>`;
+}
+
+// Diagrama unifilar de un polo. Reproduce en SVG la figura que el flujo LaTeX
+// dibujaba con TikZ: subestaciones de origen arriba, ruta de interconexión,
+// el polo al centro y las tres cifras de demanda al pie. En SVG el texto queda
+// seleccionable y pesa una fracción de la imagen.
+function renderUnifilar(block) {
+  const sources = (block.sources ?? []).slice(0, 2);
+  const alternate = block.alternate ?? null;
+  const metrics = (block.metrics ?? []).slice(0, 3);
+  // El lienzo usa centímetros del original multiplicados por cien.
+  const px = (x) => (740 + x * 100).toFixed(0);
+  const py = (y) => (470 - y * 100).toFixed(0);
+  const caja = (x, y, width, height, className, lines) => {
+    const left = px(x - width / 2);
+    const top = py(y + height / 2);
+    const first = y + height / 2 - 0.42 - (lines.length - 1) * 0.15;
+    return `<g class="${className}"><rect x="${left}" y="${top}" width="${(width * 100).toFixed(0)}" height="${(height * 100).toFixed(0)}" rx="7"/>` +
+      lines.map((line, index) => `<text class="${line.className}" x="${px(x)}" y="${py(first - index * 0.3)}" text-anchor="middle">${escapeHtml(line.text)}</text>`).join('') +
+      '</g>';
+  };
+
+  const columnas = [
+    ...sources.map((source, index) => ({ x: sources.length === 1 ? -2.55 : (index === 0 ? -5.1 : 0), source, className: 'unifilar-fuente' })),
+    ...(alternate ? [{ x: 5.1, source: alternate, className: 'unifilar-alterna' }] : [])
+  ];
+
+  const nodos = columnas.map(({ x, source, className }) => caja(x, 3.7, 4.25, 1.18, className, [
+    { text: source.label ?? '', className: 'unifilar-label' },
+    ...(source.detail ? [{ text: source.detail, className: 'unifilar-detalle' }] : [])
+  ])).join('');
+
+  // La ruta alterna no comparte el bus: baja punteada y entra al polo por un
+  // costado. Colgarla del mismo bus afirmaría una conexión que no existe.
+  const enBus = columnas.filter((columna) => columna.className !== 'unifilar-alterna');
+  const bajadas = enBus.map(({ x }) =>
+    `<path class="unifilar-red" d="M ${px(x)} ${py(3.11)} L ${px(x)} ${py(2.15)}"/>` +
+    `<rect class="unifilar-switch" x="${px(x - 0.12)}" y="${py(2.84)}" width="24" height="24"/>`).join('');
+
+  const alterno = alternate
+    ? `<path class="unifilar-red unifilar-red-alterna" d="M ${px(5.1)} ${py(3.11)} L ${px(5.1)} ${py(-0.35)} L ${px(3.25)} ${py(-0.35)}"/>` +
+      `<rect class="unifilar-switch" x="${px(5.1 - 0.12)}" y="${py(2.84)}" width="24" height="24"/>`
+    : '';
+
+  const anchoBus = enBus.length ? Math.min(...enBus.map((c) => c.x)) - 0.8 : -5.9;
+  const finBus = enBus.length ? Math.max(...enBus.map((c) => c.x)) + 1.25 : 1.25;
+  const bus = `<path class="unifilar-bus" d="M ${px(anchoBus)} ${py(2.15)} L ${px(finBus)} ${py(2.15)}"/>` +
+    `<text class="unifilar-bus-label" x="${px(anchoBus)}" y="${py(1.72)}">Ruta de interconexión eléctrica</text>`;
+
+  const transformador = `<path class="unifilar-red" d="M ${px(0)} ${py(2.15)} L ${px(0)} ${py(1.5)}"/>` +
+    `<circle class="unifilar-bobina" cx="${px(0)}" cy="${py(1.3)}" r="20"/>` +
+    `<circle class="unifilar-bobina" cx="${px(0)}" cy="${py(0.82)}" r="20"/>` +
+    `<path class="unifilar-red" d="M ${px(0)} ${py(0.62)} L ${px(0)} ${py(0.38)}"/>`;
+
+  const polo = caja(0, -0.35, 6.5, 1.45, 'unifilar-polo', [
+    { text: block.polo ?? '', className: 'unifilar-polo-label' },
+    ...(block.state ? [{ text: block.state, className: 'unifilar-detalle' }] : [])
+  ]);
+
+  const posiciones = metrics.length === 3 ? [-4, 0, 4] : metrics.length === 2 ? [-2.2, 2.2] : [0];
+  const reparto = metrics.length
+    ? `<path class="unifilar-red" d="M ${px(0)} ${py(-1.08)} L ${px(0)} ${py(-2.05)}"/>` +
+      `<path class="unifilar-red" d="M ${px(posiciones[0])} ${py(-2.05)} L ${px(posiciones.at(-1))} ${py(-2.05)}"/>` +
+      posiciones.map((x) => `<path class="unifilar-red" d="M ${px(x)} ${py(-2.05)} L ${px(x)} ${py(-2.53)}"/>`).join('')
+    : '';
+
+  const cifras = metrics.map((metric, index) => caja(posiciones[index], -3.12, 3.55, 1.18,
+    metric.variant === 'madura' ? 'unifilar-madura' : 'unifilar-kpi', [
+      { text: metric.value ?? '', className: 'unifilar-cifra' },
+      { text: metric.label ?? '', className: 'unifilar-detalle' }
+    ])).join('');
+
+  const descripcion = [
+    columnas.map(({ source }) => `${source.label ?? ''} ${source.detail ?? ''}`.trim()).join('; '),
+    block.polo ? `alimentan a ${block.polo}` : '',
+    metrics.map((metric) => `${metric.label}: ${metric.value}`).join('; ')
+  ].filter(Boolean).join('. ');
+  const id = `unifilar-${hashText(`${block.polo ?? ''}|${descripcion}`)}`;
+
+  return `<figure class="unifilar-figure">
+    <figcaption><span>Esquema unifilar</span>${escapeHtml(block.caption ?? 'Ruta de interconexión declarada para el polo')}</figcaption>
+    <svg class="unifilar" viewBox="0 0 1480 900" role="img" aria-labelledby="${id}-title ${id}-desc">
+      <title id="${id}-title">Esquema unifilar de ${escapeHtml(block.polo ?? 'el polo')}</title>
+      <desc id="${id}-desc">${escapeHtml(descripcion)}</desc>
+      <g class="unifilar-red-grupo">${bajadas}${alterno}${bus}${transformador}${reparto}</g>
+      ${nodos}${polo}${cifras}
+    </svg>
+  </figure>`;
 }
 
 function renderFlow(block) {
