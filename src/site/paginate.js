@@ -72,6 +72,7 @@
     if (overflows() && current.list.children.length > 1) {
       article.remove();
       meta.parts -= 1;
+      current.sheet.dataset.closedBy = 'bloque-no-cabe';
       current = null;
       openSheet(meta);
       openTopic(meta, { continued });
@@ -118,6 +119,7 @@
     if (currentTopic.article.children.length === 1) {
       currentTopic.article.remove();
       meta.parts -= 1;
+      current.sheet.dataset.closedBy = 'bloque-no-cabe';
       current = null;
       openSheet(meta);
       openTopic(meta);
@@ -127,6 +129,7 @@
 
     // En una hoja limpia el bloque suele volverse partible.
     const orphan = takeTrailingHeading();
+    current.sheet.dataset.closedBy = 'bloque-no-cabe';
     startContinuation(meta);
     if (orphan) currentTopic.article.append(orphan);
     placeBlock(node, meta);

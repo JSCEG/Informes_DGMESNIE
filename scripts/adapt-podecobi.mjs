@@ -37,6 +37,11 @@ try {
   const stages = tally(inventory.map((polo) => polo.stage).filter(Boolean));
   const states = new Set(inventory.map((polo) => polo.state).filter(Boolean));
 
+  const byState = tally(inventory.map((polo) => polo.state).filter(Boolean));
+  const bySurface = [...inventory]
+    .filter((polo) => Number.isFinite(Number(polo.official_area_ha)))
+    .sort((left, right) => Number(right.official_area_ha) - Number(left.official_area_ha));
+
   const sections = [];
   sections.push({
     id: 'panorama', level: 1, number: '1', title: 'Panorama general',
@@ -46,8 +51,42 @@ try {
         { label: 'Polos declarados', value: String(inventory.length), detail: 'Universo oficial verificado' },
         { label: 'Entidades', value: String(states.size), detail: 'Con al menos un polo' },
         { label: 'Superficie agregada', value: `${totalArea.toFixed(2)} ha`, detail: 'Suma de la superficie oficial' },
-        ...[...stages].slice(0, 3).map(([stage, count]) => ({ label: stage, value: String(count), detail: 'Polos en esta etapa' }))
-      ] }
+        { label: 'Superficie media', value: `${(totalArea / inventory.length).toFixed(2)} ha`, detail: 'Promedio por polo' }
+      ] },
+      {
+        type: 'national-map',
+        eyebrow: 'Distribución territorial',
+        caption: `Los ${inventory.length} polos declarados y su entidad`,
+        source: 'Centroides del GeoJSON oficial; contorno de entidades simplificado para impresión.',
+        points: inventory
+          .filter((polo) => Number.isFinite(polo.centroid_lon) && Number.isFinite(polo.centroid_lat))
+          .map((polo) => ({ at: [polo.centroid_lon, polo.centroid_lat], label: String(polo.num ?? ''), name: polo.official_name ?? '' }))
+      },
+      {
+        type: 'chart-bars',
+        eyebrow: 'Superficie',
+        caption: 'Hectáreas declaradas por polo',
+        source: 'Superficie oficial del inventario maestro.',
+        items: bySurface.map((polo) => ({
+          label: `${polo.num ?? ''} ${polo.official_name ?? ''}`.trim(),
+          value: Number(polo.official_area_ha),
+          display: `${formatArea(polo.official_area_ha)} ha`
+        }))
+      },
+      {
+        type: 'chart-bars',
+        eyebrow: 'Etapa',
+        caption: 'Polos por etapa declarada',
+        source: 'Etapa registrada en el inventario maestro.',
+        items: [...stages].map(([stage, count]) => ({ label: stage, value: count, display: String(count) }))
+      },
+      {
+        type: 'chart-bars',
+        eyebrow: 'Entidades',
+        caption: 'Polos por entidad federativa',
+        source: 'Entidad declarada en el inventario maestro.',
+        items: byState.map(([state, count]) => ({ label: state, value: count, display: String(count) }))
+      }
     ]
   });
 
@@ -86,6 +125,18 @@ try {
       id: slugify(`${polo.num ?? index + 1}-${polo.official_name ?? 'polo'}`),
       level: 2, number: `3.${index + 1}`,
       title: polo.official_name ?? `Polo ${index + 1}`,
+      // Portadilla propia: el inventario se imprime y se reparte por fichas, así
+      // que cada polo empieza en hoja nueva y se anuncia con sus cifras ancla.
+      opener: {
+        subtitle: [polo.municipality, polo.state].filter(Boolean).join(', '),
+        badge: [polo.stage, polo.substage].filter(Boolean).join(' · '),
+        metrics: [
+          { label: 'Superficie', value: `${formatArea(polo.official_area_ha)} ha` },
+          polo.electric_demand ? { label: 'Demanda', value: polo.electric_demand } : null,
+          polo.maximum_demand ? { label: 'Demanda máxima', value: polo.maximum_demand } : null,
+          Number.isFinite(Number(polo.progress_manual_pct)) ? { label: 'Avance', value: `${polo.progress_manual_pct}%` } : null
+        ].filter(Boolean)
+      },
       blocks
     });
   }

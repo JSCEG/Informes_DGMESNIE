@@ -54,7 +54,9 @@
     "code",
     "polo",
     "unifilar",
-    "polo-map"
+    "polo-map",
+    "chart-bars",
+    "national-map"
   ],
   "max_sections": 100,
   "max_sources": 300,

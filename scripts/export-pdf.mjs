@@ -118,12 +118,10 @@ try {
       const next = pages[index + 1];
       const closesRun = !next || !next.classList.contains('paginated-sheet');
       if (closesRun) return null;
-      // Tampoco es desperdicio cuando lo primero de la hoja siguiente es un
-      // bloque indivisible que no cabía en el hueco: el compositor hizo lo que
-      // podía y adelantarlo habría partido una figura.
-      const leftover = usable - used;
-      const siguiente = next.querySelector('.packed-topic > *:not(.packed-topic-heading)');
-      if (siguiente && siguiente.getBoundingClientRect().height > leftover) return null;
+      // Tampoco es desperdicio cuando el compositor cerró la hoja porque el
+      // bloque siguiente no cabía. Lo declara él mismo al componer, que es
+      // quien lo sabe; deducirlo aquí midiendo de nuevo daba falsos positivos.
+      if (page.dataset.closedBy) return null;
       return { page: index + 1, fill: Number(fill.toFixed(2)) };
     }).filter((item) => item && item.fill < 0.6);
     return {

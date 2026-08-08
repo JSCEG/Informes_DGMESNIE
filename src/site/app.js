@@ -13,7 +13,7 @@ function startReader() {
 const reportMain = document.querySelector('.editorial-cover')?.closest('main');
 // El panel de versión es cáscara web, no una hoja del documento: la
 // contraportada debe cerrar tanto el libro como el PDF.
-const pageCandidates = reportMain ? [...reportMain.querySelectorAll(':scope > .editorial-cover, :scope > .report-toc, :scope > .report-content > .chapter-opener, :scope > .report-content > .report-section, :scope > .source-profile, :scope > .sources, :scope > .report-closing, :scope > .report-back-cover')] : [];
+const pageCandidates = reportMain ? [...reportMain.querySelectorAll(':scope > .editorial-cover, :scope > .report-toc, :scope > .report-content > .chapter-opener, :scope > .report-content > .section-opener, :scope > .report-content > .report-section, :scope > .source-profile, :scope > .sources, :scope > .report-closing, :scope > .report-back-cover')] : [];
 const pageIndicator = document.querySelector('[data-page-indicator]');
 const zoomIndicator = document.querySelector('[data-zoom-indicator]');
 const viewButton = document.querySelector('[data-reader-action="view"]');

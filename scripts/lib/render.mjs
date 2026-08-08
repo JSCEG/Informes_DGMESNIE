@@ -387,6 +387,13 @@ function renderContentPages(contentSections, contract) {
     }
 
     const runningHead = currentChapter ? `<div class="chapter-running-head"><a href="#contenido">${escapeHtml(currentChapter.number || '')} · ${escapeHtml(currentChapter.title)}</a><span>Corte ${escapeHtml(contract.cutoff)}</span></div>` : '';
+    // Un apartado puede pedir su propia portadilla. Para un inventario que se
+    // imprime y se reparte por partes, cada ficha necesita empezar en hoja
+    // propia y anunciarse.
+    if (section.opener && !isChapter) {
+      output.push(renderSectionOpener(section, currentChapter, contract));
+    }
+
     if (hasNarrative) {
       output.push(renderFlowTopic({ section, blocks: narrativeBlocks, chapter: currentChapter, index, isChapter }));
     }
@@ -420,6 +427,30 @@ function renderFlowTopic({ section, blocks, chapter, index, isChapter }) {
     `${section.eyebrow ? `<p class="eyebrow">${escapeHtml(section.eyebrow)}</p>` : ''}` +
     `${blocks.map(renderBlock).join('')}` +
     '</article>';
+}
+
+// Portadilla de apartado: hoja propia que anuncia la ficha que sigue, con sus
+// cifras ancla. La declara el contrato en `opener`, así que ningún informe la
+// recibe sin pedirla.
+function renderSectionOpener(section, chapter, contract) {
+  const opener = section.opener === true ? {} : (section.opener ?? {});
+  const number = section.number || '';
+  const metrics = (opener.metrics ?? []).slice(0, 4).map((metric) =>
+    `<article><span>${escapeHtml(metric.label ?? '')}</span><strong>${escapeHtml(metric.value ?? '')}</strong></article>`).join('');
+  return `<section class="section-opener" id="${escapeHtml(section.id)}-portadilla" aria-labelledby="${escapeHtml(section.id)}-portadilla-title">
+    <div class="section-opener-top">
+      <span>${escapeHtml(chapter ? `${chapter.number || ''} · ${chapter.title}` : contract.title)}</span><i></i>
+      <small>Corte ${escapeHtml(contract.cutoff)}</small>
+    </div>
+    <div class="section-opener-title">
+      <strong>${escapeHtml(number)}</strong>
+      <h2 id="${escapeHtml(section.id)}-portadilla-title">${escapeHtml(section.title)}</h2>
+      ${opener.subtitle ? `<p>${escapeHtml(opener.subtitle)}</p>` : ''}
+      ${opener.badge ? `<span class="section-opener-badge">${escapeHtml(opener.badge)}</span>` : ''}
+      <div class="institutional-separator gold" aria-hidden="true"><i></i><b></b><i></i></div>
+    </div>
+    ${metrics ? `<div class="section-opener-metrics">${metrics}</div>` : ''}
+  </section>`;
 }
 
 function chunkArray(items, size) {
@@ -487,9 +518,90 @@ function renderBlock(block) {
   if (block.type === 'polo') return renderPolo(block);
   if (block.type === 'unifilar') return renderUnifilar(block);
   if (block.type === 'polo-map') return renderPoloMap(block);
+  if (block.type === 'chart-bars') return renderBarChart(block);
+  if (block.type === 'national-map') return renderNationalMap(block);
   if (block.type === 'metrics') return `<div class="metrics-grid">${block.items.map((item) => `<article class="metric"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong><p>${escapeHtml(item.detail ?? '')}</p></article>`).join('')}</div>`;
   if (block.type === 'code') return `<pre><code>${escapeHtml(block.text)}</code></pre>`;
   return '';
+}
+
+// Gráfica de barras en SVG. Se prefiere al gráfico interactivo porque el
+// documento se imprime: aquí las etiquetas y las cifras son texto real y no
+// dependen de que un script llegue a ejecutarse.
+function renderBarChart(block) {
+  const items = (block.items ?? []).filter((item) => Number.isFinite(Number(item.value)));
+  if (!items.length) return '';
+  const maximum = Math.max(...items.map((item) => Number(item.value)));
+  const rowHeight = 46;
+  // La columna de etiquetas se dimensiona con el texto más largo: con un ancho
+  // fijo, los nombres largos quedaban debajo de las barras.
+  const longestLabel = Math.max(...items.map((item) => String(item.label ?? '').length));
+  const labelWidth = Math.min(440, Math.max(170, longestLabel * 10.5 + 16));
+  // Si aun al tope la etiqueta no cabe, se reduce el cuerpo en vez de recortar
+  // el texto: el nombre del polo debe leerse completo.
+  const labelSize = Math.max(13, Math.min(21, (labelWidth - 16) / (longestLabel * 0.5)));
+  const longestValue = Math.max(...items.map((item) => String(item.display ?? item.value).length));
+  const valueWidth = Math.min(160, Math.max(70, longestValue * 12 + 16));
+  const width = 1000;
+  const height = items.length * rowHeight + 12;
+  const trackWidth = width - labelWidth - valueWidth - 24;
+  const rows = items.map((item, index) => {
+    const value = Number(item.value);
+    const y = index * rowHeight + 6;
+    const barWidth = maximum > 0 ? Math.max(2, (value / maximum) * trackWidth) : 2;
+    return `<g class="barra">
+      <text class="barra-etiqueta" x="0" y="${y + 26}" style="font-size:${labelSize.toFixed(1)}px">${escapeHtml(item.label ?? '')}</text>
+      <rect class="barra-pista" x="${labelWidth}" y="${y + 10}" width="${trackWidth}" height="20" rx="2"/>
+      <rect class="barra-valor" x="${labelWidth}" y="${y + 10}" width="${barWidth.toFixed(1)}" height="20" rx="2"/>
+      <text class="barra-cifra" x="${width - valueWidth + 8}" y="${y + 26}">${escapeHtml(item.display ?? String(value))}</text>
+    </g>`;
+  }).join('');
+  const id = `barras-${hashText(items.map((item) => `${item.label}:${item.value}`).join('|'))}`;
+  const resumen = items.map((item) => `${item.label}: ${item.display ?? item.value}`).join('; ');
+  return `<figure class="chart-figure">
+    <figcaption><span>${escapeHtml(block.eyebrow ?? 'Distribución')}</span>${escapeHtml(block.caption ?? '')}</figcaption>
+    <svg class="chart-bars" viewBox="0 0 ${width} ${height}" style="aspect-ratio:${width} / ${height}" role="img" aria-labelledby="${id}-title ${id}-desc">
+      <title id="${id}-title">${escapeHtml(block.caption ?? 'Distribución')}</title>
+      <desc id="${id}-desc">${escapeHtml(resumen)}</desc>
+      ${rows}
+    </svg>
+    ${block.source ? `<p class="chart-source">${escapeHtml(block.source)}</p>` : ''}
+  </figure>`;
+}
+
+// Mapa nacional con los puntos declarados. Reutiliza el contorno simplificado.
+function renderNationalMap(block) {
+  const outline = mexicoOutline();
+  const points = (block.points ?? []).filter((point) => Array.isArray(point.at) && point.at.length === 2);
+  if (!outline || !points.length) return '';
+  const box = { w: 1000, h: 640, pad: 24 };
+  const bounds = { minLon: -118.5, maxLon: -86.0, minLat: 14.3, maxLat: 32.9 };
+  const compress = Math.cos(23 * Math.PI / 180);
+  const scale = Math.min(
+    (box.w - box.pad * 2) / ((bounds.maxLon - bounds.minLon) * compress),
+    (box.h - box.pad * 2) / (bounds.maxLat - bounds.minLat)
+  );
+  const project = ([lon, lat]) => [
+    (box.pad + (lon - bounds.minLon) * compress * scale).toFixed(1),
+    (box.pad + (bounds.maxLat - lat) * scale).toFixed(1)
+  ];
+  const paises = outline.states.map((state) => state.rings
+    .map((ring) => `${ring.map((point, index) => `${index ? 'L' : 'M'} ${project(point).join(' ')}`).join(' ')} Z`).join(' ')).join(' ');
+  const marcas = points.map((point) => {
+    const [x, y] = project(point.at);
+    return `<g class="mapa-punto"><circle cx="${x}" cy="${y}" r="9"/><text x="${x}" y="${(Number(y) + 4.5).toFixed(1)}" text-anchor="middle">${escapeHtml(point.label ?? '')}</text></g>`;
+  }).join('');
+  const id = `mapa-nacional-${hashText(points.map((point) => point.at.join(',')).join('|'))}`;
+  return `<figure class="chart-figure">
+    <figcaption><span>${escapeHtml(block.eyebrow ?? 'Distribución territorial')}</span>${escapeHtml(block.caption ?? '')}</figcaption>
+    <svg class="mapa-nacional" viewBox="0 0 ${box.w} ${box.h}" role="img" aria-labelledby="${id}-title ${id}-desc">
+      <title id="${id}-title">${escapeHtml(block.caption ?? 'Distribución territorial')}</title>
+      <desc id="${id}-desc">${escapeHtml(points.map((point) => `${point.label}: ${point.name ?? ''}`).join('; '))}</desc>
+      <path class="polo-map-pais" d="${paises}"/>
+      ${marcas}
+    </svg>
+    ${block.source ? `<p class="chart-source">${escapeHtml(block.source)}</p>` : ''}
+  </figure>`;
 }
 
 // Contorno nacional simplificado para el localizador. Se carga una sola vez y
