@@ -37,6 +37,13 @@ try {
   const stages = tally(inventory.map((polo) => polo.stage).filter(Boolean));
   const states = new Set(inventory.map((polo) => polo.state).filter(Boolean));
 
+  const avances = inventory
+    .filter((polo) => Number.isFinite(Number(polo.progress_manual_pct)))
+    .map((polo) => ({ polo, avance: Number(polo.progress_manual_pct) }))
+    .sort((left, right) => right.avance - left.avance);
+  const semaforo = { verde: [], ambar: [], rojo: [] };
+  for (const item of avances) semaforo[tono(item.avance)].push(item);
+
   const bySurface = [...inventory]
     .filter((polo) => Number.isFinite(Number(polo.official_area_ha)))
     .sort((left, right) => Number(right.official_area_ha) - Number(left.official_area_ha));
@@ -46,12 +53,46 @@ try {
     id: 'panorama', level: 1, number: '1', title: 'Panorama general',
     blocks: [
       { type: 'lead', text: `El universo oficial comprende ${inventory.length} polos con declaratoria vigente en ${states.size} entidades y ${totalArea.toFixed(2)} hectáreas de superficie jurídica agregada.` },
+      // La descripción del programa remite a su página oficial en lugar de
+      // reformularla: este informe da seguimiento, no define la política.
+      {
+        type: 'paragraph',
+        text: {
+          text: `Cada polo se constituye por una declaratoria publicada en el Diario Oficial de la Federación y se acompaña de un convenio entre la Secretaría de Economía y el gobierno del estado. El seguimiento de esta edición se limita a lo que esos actos y las fichas oficiales declaran: superficie, etapa, vocaciones productivas, demanda eléctrica y de gas, e infraestructura de interconexión. La descripción del programa y sus estímulos corresponde a la Secretaría de Economía y puede consultarse en Polos de Desarrollo Económico para el Bienestar.`,
+          runs: [
+            { t: 'Cada polo se constituye por una declaratoria publicada en el Diario Oficial de la Federación y se acompaña de un convenio entre la Secretaría de Economía y el gobierno del estado. El seguimiento de esta edición se limita a lo que esos actos y las fichas oficiales declaran: superficie, etapa, vocaciones productivas, demanda eléctrica y de gas, e infraestructura de interconexión. La descripción del programa y sus estímulos corresponde a la Secretaría de Economía y puede consultarse en ' },
+            { t: 'Polos de Desarrollo Económico para el Bienestar', u: 'https://www.gob.mx/se/acciones-y-programas/polos-de-desarrollo-economico-para-el-bienestar' },
+            { t: '.' }
+          ]
+        }
+      },
       { type: 'metrics', items: [
         { label: 'Polos declarados', value: String(inventory.length), detail: 'Universo oficial verificado' },
         { label: 'Entidades', value: String(states.size), detail: 'Con al menos un polo' },
         { label: 'Superficie agregada', value: `${totalArea.toFixed(2)} ha`, detail: 'Suma de la superficie oficial' },
         { label: 'Superficie media', value: `${(totalArea / inventory.length).toFixed(2)} ha`, detail: 'Promedio por polo' }
       ] },
+      // El avance es la lectura que más se consulta, así que abre con su propio
+      // semáforo y con el mismo color que después usan el mapa y las fichas.
+      { type: 'heading', text: 'Avance del programa: semáforo por polo' },
+      { type: 'metrics', items: [
+        { label: 'Avance promedio', value: `${Math.round(avances.reduce((total, item) => total + item.avance, 0) / (avances.length || 1))}%`, detail: 'Promedio simple de los polos que lo reportan' },
+        { label: 'En verde', value: String(semaforo.verde.length), detail: 'Avance de 50 % o más' },
+        { label: 'En ámbar', value: String(semaforo.ambar.length), detail: 'Entre 20 % y 49 %' },
+        { label: 'En rojo', value: String(semaforo.rojo.length), detail: 'Por debajo de 20 %' }
+      ] },
+      {
+        type: 'chart-bars',
+        eyebrow: 'Avance',
+        caption: 'Avance reportado por polo',
+        source: 'Avance manual del inventario maestro. Verde desde 50 %, ámbar entre 20 % y 49 %, rojo por debajo de 20 %.',
+        items: avances.map(({ polo, avance }) => ({
+          label: `${polo.num ?? ''} ${polo.official_name ?? ''}`.trim(),
+          value: avance,
+          display: `${avance}%`,
+          tone: tono(avance)
+        }))
+      },
       {
         type: 'national-map',
         eyebrow: 'Distribución territorial',
@@ -59,7 +100,7 @@ try {
         source: `Cada polo se ubica por el centroide de su polígono declarado. Los ${inventory.length} se distribuyen en ${states.size} entidades, de Baja California a Quintana Roo, sin que ninguna concentre más de uno.`,
         points: inventory
           .filter((polo) => Number.isFinite(polo.centroid_lon) && Number.isFinite(polo.centroid_lat))
-          .map((polo) => ({ at: [polo.centroid_lon, polo.centroid_lat], label: String(polo.num ?? ''), name: polo.official_name ?? '', detail: polo.state ?? '' }))
+          .map((polo) => ({ at: [polo.centroid_lon, polo.centroid_lat], label: String(polo.num ?? ''), name: polo.official_name ?? '', detail: polo.state ?? '', tone: Number.isFinite(Number(polo.progress_manual_pct)) ? tono(Number(polo.progress_manual_pct)) : undefined }))
       },
       {
         type: 'chart-bars',
@@ -396,6 +437,13 @@ function latestCutoff(inventory) {
 // Sólo se grafica lo que viene en cifra. Un rango como «3.3–5.6 MW» se resuelve
 // con su extremo superior, que es el valor que la propia ficha reporta como
 // máximo; si no hay número, el polo no entra a la gráfica.
+// Umbral único del semáforo: lo usan las cifras, las barras y el mapa.
+function tono(avance) {
+  if (avance >= 50) return 'verde';
+  if (avance >= 20) return 'ambar';
+  return 'rojo';
+}
+
 function parseMegawatts(value) {
   const numbers = String(value ?? '').match(/d+(?:[.,]d+)?/g);
   if (!numbers) return null;

@@ -544,15 +544,20 @@ function renderBarChart(block) {
   const width = 1000;
   const height = items.length * rowHeight + 12;
   const trackWidth = width - labelWidth - valueWidth - 24;
+  // Un tono opcional agrupa las barras por estado: el mismo semáforo que usan
+  // el mapa y la ficha, para que el lector no traduzca entre representaciones.
+  const dotted = items.some((item) => item.tone);
   const rows = items.map((item, index) => {
     const value = Number(item.value);
     const y = index * rowHeight + 6;
     const barWidth = maximum > 0 ? Math.max(2, (value / maximum) * trackWidth) : 2;
+    const tone = item.tone ? ` tono-${item.tone}` : '';
     return `<g class="barra">
-      <text class="barra-etiqueta" x="0" y="${y + 26}" style="font-size:${labelSize.toFixed(1)}px">${escapeHtml(item.label ?? '')}</text>
+      ${dotted ? `<circle class="barra-punto${tone}" cx="8" cy="${y + 20}" r="7"/>` : ''}
+      <text class="barra-etiqueta" x="${dotted ? 26 : 0}" y="${y + 26}" style="font-size:${labelSize.toFixed(1)}px">${escapeHtml(item.label ?? '')}</text>
       <rect class="barra-pista" x="${labelWidth}" y="${y + 10}" width="${trackWidth}" height="20" rx="2"/>
-      <rect class="barra-valor" x="${labelWidth}" y="${y + 10}" width="${barWidth.toFixed(1)}" height="20" rx="2"/>
-      <text class="barra-cifra" x="${width - valueWidth + 8}" y="${y + 26}">${escapeHtml(item.display ?? String(value))}</text>
+      <rect class="barra-valor${tone}" x="${labelWidth}" y="${y + 10}" width="${barWidth.toFixed(1)}" height="20" rx="2"/>
+      <text class="barra-cifra${tone}" x="${width - valueWidth + 8}" y="${y + 26}">${escapeHtml(item.display ?? String(value))}</text>
     </g>`;
   }).join('');
   const id = `barras-${hashText(items.map((item) => `${item.label}:${item.value}`).join('|'))}`;
@@ -584,15 +589,29 @@ function renderNationalMap(block) {
     (box.pad + (lon - bounds.minLon) * compress * scale).toFixed(1),
     (box.pad + (bounds.maxLat - lat) * scale).toFixed(1)
   ];
-  const paises = outline.states.map((state) => state.rings
-    .map((ring) => `${ring.map((point, index) => `${index ? 'L' : 'M'} ${project(point).join(' ')}`).join(' ')} Z`).join(' ')).join(' ');
+  // Las entidades con polo se distinguen del resto del país. El nombre corto de
+  // uso común no coincide con la denominación completa del marco geoestadístico,
+  // así que la comparación tolera que uno contenga al otro.
+  const conPolo = [...new Set(points.map((point) => normalizeText(point.detail ?? '')).filter(Boolean))];
+  const alberga = (nombre) => {
+    const estado = normalizeText(nombre).replace(/^estado de /, '');
+    return conPolo.some((declarado) => {
+      const corto = declarado.replace(/^estado de /, '');
+      return estado === corto || estado.startsWith(`${corto} `) || corto.startsWith(`${estado} `);
+    });
+  };
+  const paises = outline.states.map((state) => {
+    const path = state.rings.map((ring) => `${ring.map((point, index) => `${index ? 'L' : 'M'} ${project(point).join(' ')}`).join(' ')} Z`).join(' ');
+    return `<path class="polo-map-pais${alberga(state.name) ? ' mapa-estado-activo' : ''}" d="${path}"/>`;
+  }).join('');
   const marcas = points.map((point) => {
     const [x, y] = project(point.at);
-    return `<g class="mapa-punto"><circle cx="${x}" cy="${y}" r="14"/><text x="${x}" y="${(Number(y) + 6).toFixed(1)}" text-anchor="middle">${escapeHtml(point.label ?? '')}</text></g>`;
+    const tone = point.tone ? ` tono-${point.tone}` : '';
+    return `<g class="mapa-punto${tone}"><circle cx="${x}" cy="${y}" r="14"/><text x="${x}" y="${(Number(y) + 6).toFixed(1)}" text-anchor="middle">${escapeHtml(point.label ?? '')}</text></g>`;
   }).join('');
   // Leyenda al pie: el número del mapa por sí solo no dice qué polo es.
   const leyenda = points.some((point) => point.name)
-    ? `<ol class="mapa-leyenda">${points.map((point) => `<li><span>${escapeHtml(point.label ?? '')}</span><b>${escapeHtml(point.name ?? '')}</b>${point.detail ? `<em>${escapeHtml(point.detail)}</em>` : ''}</li>`).join('')}</ol>`
+    ? `<ol class="mapa-leyenda">${points.map((point) => `<li><span class="${point.tone ? `tono-${point.tone}` : ''}">${escapeHtml(point.label ?? '')}</span><b>${escapeHtml(point.name ?? '')}</b>${point.detail ? `<em>${escapeHtml(point.detail)}</em>` : ''}</li>`).join('')}</ol>`
     : '';
   const id = `mapa-nacional-${hashText(points.map((point) => point.at.join(',')).join('|'))}`;
   return `<figure class="chart-figure">
@@ -600,7 +619,7 @@ function renderNationalMap(block) {
     <svg class="mapa-nacional" viewBox="0 0 ${box.w} ${box.h}" role="img" aria-labelledby="${id}-title ${id}-desc">
       <title id="${id}-title">${escapeHtml(block.caption ?? 'Distribución territorial')}</title>
       <desc id="${id}-desc">${escapeHtml(points.map((point) => `${point.label}: ${point.name ?? ''}`).join('; '))}</desc>
-      <path class="polo-map-pais" d="${paises}"/>
+      ${paises}
       ${marcas}
     </svg>
     ${leyenda}

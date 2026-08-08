@@ -1074,3 +1074,22 @@ pre { padding: 20px; overflow: auto; background: var(--ink); color: var(--white)
 .polo-numero { color: var(--polo); }
 .polo-avance b { background: var(--polo); }
 .section-opener-title > strong { color: var(--polo-tenue); }
+
+/* Semáforo de avance: mismo código de color en el mapa, las barras y la ficha. */
+:root { --avance-verde: #1a7f66; --avance-ambar: #d3971d; --avance-rojo: #c0512c; }
+.tono-verde { fill: var(--avance-verde); }
+.tono-ambar { fill: var(--avance-ambar); }
+.tono-rojo { fill: var(--avance-rojo); }
+text.tono-verde { fill: var(--avance-verde); }
+text.tono-ambar { fill: var(--avance-ambar); }
+text.tono-rojo { fill: var(--avance-rojo); }
+.mapa-punto.tono-verde circle { fill: var(--avance-verde); }
+.mapa-punto.tono-ambar circle { fill: var(--avance-ambar); }
+.mapa-punto.tono-rojo circle { fill: var(--avance-rojo); }
+.mapa-estado-activo { fill: #f3e6ec; stroke: #c9a3b1; }
+.mapa-leyenda span.tono-verde { background: var(--avance-verde); }
+.mapa-leyenda span.tono-ambar { background: var(--avance-ambar); }
+.mapa-leyenda span.tono-rojo { background: var(--avance-rojo); }
+.semaforo-verde strong { color: var(--avance-verde); }
+.semaforo-ambar strong { color: var(--avance-ambar); }
+.semaforo-rojo strong { color: var(--avance-rojo); }
