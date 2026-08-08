@@ -168,7 +168,7 @@ try {
   for (const [index, polo] of inventory.entries()) {
     const shape = shapes.find(polo.centroid_lon, polo.centroid_lat);
     const diagram = diagrams.get(String(polo.num ?? '').padStart(2, '0'));
-    const blocks = [poloBlock(polo, { includeContacts })];
+    const blocks = [poloBlock(polo, { includeContacts, resumido: true })];
     if (shape) {
       blocks.push({
         type: 'polo-map', label: polo.official_name ?? '', state: polo.state ?? '',
@@ -264,7 +264,10 @@ try {
   process.exitCode = 1;
 }
 
-function poloBlock(polo, { includeContacts = false } = {}) {
+// Cuando el apartado abre con portadilla, ésta ya lleva ubicación, etapa,
+// cifras ancla y avance. La ficha no los repite: se queda con las vocaciones y
+// el detalle documental, que es lo que la portadilla no cabe a mostrar.
+function poloBlock(polo, { includeContacts = false, resumido = false } = {}) {
   const metrics = [
     { label: 'Superficie oficial', value: `${formatArea(polo.official_area_ha)} ha`, detail: polo.declaration_date ? `Declaratoria del ${polo.declaration_date}` : '' },
     polo.electric_demand ? { label: 'Demanda eléctrica', value: polo.electric_demand, detail: polo.electric_demand_note ?? '' } : null,
@@ -303,12 +306,14 @@ function poloBlock(polo, { includeContacts = false } = {}) {
 
   return {
     type: 'polo',
-    state: polo.state ?? '',
-    municipality: polo.municipality ?? '',
-    stage: polo.stage ?? '',
-    substage: polo.substage ?? '',
-    ...(Number.isFinite(Number(polo.progress_manual_pct)) ? { progress: Number(polo.progress_manual_pct) } : {}),
-    metrics,
+    ...(resumido ? {} : {
+      state: polo.state ?? '',
+      municipality: polo.municipality ?? '',
+      stage: polo.stage ?? '',
+      substage: polo.substage ?? ''
+    }),
+    ...(!resumido && Number.isFinite(Number(polo.progress_manual_pct)) ? { progress: Number(polo.progress_manual_pct) } : {}),
+    metrics: resumido ? [] : metrics,
     activities: Array.isArray(polo.productive_activities) ? polo.productive_activities : [],
     groups: [
       { title: 'Sustento documental', fields: documental },

@@ -747,12 +747,13 @@ function renderPolo(block) {
   // contenido de un apartado que ya se titula con el polo, repetirlo llenaría
   // la hoja con el mismo texto dos veces.
   const named = Boolean(block.name);
+  const conEncabezado = named || block.municipality || block.state || block.stage;
   return `<article class="polo-ficha${named ? '' : ' polo-ficha-sin-titulo'}">
-    <header class="polo-encabezado">
+    ${conEncabezado ? `<header class="polo-encabezado">
       ${named ? `<div><span class="polo-numero">${escapeHtml(block.number ?? '')}</span><h2>${escapeHtml(block.name)}</h2></div>` : ''}
       <p class="polo-ubicacion">${escapeHtml([block.municipality, block.state].filter(Boolean).join(', '))}</p>
       ${badge}
-    </header>
+    </header>` : ''}
     ${metrics ? `<div class="polo-cifras">${metrics}</div>` : ''}
     ${progress}
     ${activities ? `<section class="polo-vocaciones"><h3>Vocaciones productivas</h3><ul>${activities}</ul></section>` : ''}
