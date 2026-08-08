@@ -188,6 +188,23 @@ html.is-paginating main { visibility: hidden; }
 .reader-paged .polo-cifras strong { font-size: 20px; }
 .reader-paged .polo-grupo dd, .reader-paged .polo-vocaciones li { font-size: 11px; }
 
+/* Mapa del polo: polígono declarado, barra de escala y localizador nacional. */
+.polo-map-figure { margin: 26px 0; }
+.polo-map-figure > figcaption { padding: 12px 0; display: flex; justify-content: space-between; gap: 20px; border-top: 3px solid var(--gold); color: var(--muted); font-size: 11px; }
+.polo-map-figure > figcaption span { color: var(--wine); font: 800 9px var(--mono); letter-spacing: .11em; text-transform: uppercase; }
+.polo-map { width: 100%; height: auto; display: block; margin-top: 10px; border: 1px solid var(--line); }
+.polo-map-fondo { fill: #f7f5f1; }
+.polo-map-shape { fill: rgba(155, 34, 71, .16); stroke: var(--wine); stroke-width: 2.4; stroke-linejoin: round; }
+.polo-map-escala path { stroke: var(--ink); stroke-width: 2; fill: none; }
+.polo-map-escala text { fill: var(--ink); font: 700 15px var(--mono); }
+.polo-map-localizador rect { fill: rgba(255, 255, 255, .94); stroke: var(--line); stroke-width: 1.5; }
+.polo-map-pais { fill: #e8e3db; stroke: #b9b2a9; stroke-width: .7; stroke-linejoin: round; }
+.polo-map-punto { fill: var(--wine); stroke: var(--white); stroke-width: 2; }
+.polo-map-datos { margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 24px; }
+.polo-map-datos dt { color: var(--muted); font: 700 8.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.polo-map-datos dd { margin: 3px 0 0; font: 700 13px var(--sans); }
+.reader-paged .polo-map-datos dd { font-size: 11.5px; }
+
 /* Unifilar: mismo trazo que el diagrama TikZ, con el texto seleccionable. */
 .unifilar-figure { margin: 28px 0; }
 .unifilar-figure > figcaption { padding: 12px 0; display: flex; justify-content: space-between; gap: 20px; border-top: 3px solid var(--gold); color: var(--muted); font-size: 11px; }

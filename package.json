@@ -16,14 +16,15 @@
     "build:local-draft": "node scripts/build-site.mjs --input .shadow/publicable.json --output dist --base-url https://local.informes.invalid",
     "refresh:local-shell": "node scripts/build-site.mjs --input .shadow/publicable.json --output dist --base-url https://local.informes.invalid --refresh-shell",
     "export:model:pdf": "node scripts/export-pdf.mjs --route /informes/modelo-editorial/ --output output/pdf/modelo-editorial.pdf --public-output dist/informes/modelo-editorial/modelo-editorial.pdf --title \"Informe modelo editorial\"",
-    "check:model:pdf": "node scripts/check-pdf.mjs --input output/pdf/modelo-editorial.pdf --title \"Informe modelo editorial\" --pages 24",
+    "check:model:pdf": "node scripts/check-pdf.mjs --input output/pdf/modelo-editorial.pdf --title \"Informe modelo editorial\" --pages 25",
     "export:radar:pdf": "node scripts/export-pdf.mjs --route /informes/radar-regulatorio-energetico/ --output output/pdf/marco-regulatorio-energetico.pdf --title \"Marco regulatorio\" --versioned",
     "check:radar:pdf": "node scripts/check-pdf.mjs --from-audit output/pdf/marco-regulatorio-energetico.audit.json --title \"Marco regulatorio\"",
     "check:dist": "node scripts/check-dist.mjs --output dist",
     "serve": "node scripts/serve.mjs --root dist --port 4173",
     "serve:fixture": "node scripts/serve.mjs --root .shadow/fixture-dist --port 4173",
     "test": "node --test",
-    "check": "npm run test && npm run build:fixture && node scripts/check-dist.mjs --output .shadow/fixture-dist"
+    "check": "npm run test && npm run build:fixture && node scripts/check-dist.mjs --output .shadow/fixture-dist",
+    "build:map:asset": "node scripts/build-map-asset.mjs --input \"C:/Users/User/Documents/Codex/Documentos latex/10_Informe_PODECOBI/data/embedded_estados.geojson\" --output config/mexico-estados.json"
   },
   "devDependencies": {
     "pdf-lib": "^1.17.1",

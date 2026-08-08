@@ -48,7 +48,8 @@
     "flow",
     "code",
     "polo",
-    "unifilar"
+    "unifilar",
+    "polo-map"
   ],
   "max_sections": 100,
   "max_sources": 300,

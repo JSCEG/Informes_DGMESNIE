@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 export function escapeHtml(value = '') {
   return String(value).replace(/[&<>"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[character]);
 }
@@ -178,8 +179,9 @@ export function renderModelReport() {
     ['modelo-mixta', '12', 'Gráfica mixta'],
     ['modelo-video', '13', 'Video integrado'],
     ['modelo-polo', '14', 'Ficha de polo'],
-    ['modelo-unifilar', '15', 'Esquema unifilar'],
-    ['modelo-ficha-tecnica', '16', 'Ficha técnica y créditos']
+    ['modelo-polo-mapa', '15', 'Mapa del polo'],
+    ['modelo-unifilar', '16', 'Esquema unifilar'],
+    ['modelo-ficha-tecnica', '17', 'Ficha técnica y créditos']
   ];
   const tocItems = toc.map(([id, number, title]) => `<li><a href="#${id}"><span>${number}</span><strong>${title}</strong><i></i><em>Abrir</em></a></li>`).join('');
   const running = (number, title) => `<div class="chapter-running-head"><a href="#contenido-modelo">${number} · ${title}</a><span>Muestrario local · datos ilustrativos</span></div>`;
@@ -255,7 +257,8 @@ export function renderModelReport() {
         ] }
       ]
     })}<p class="chart-source">Fuente: inventario maestro PODECOBI, corte del 14 de julio de 2026. Los datos de contacto del registro no se publican.</p></div></section>
-    <section class="report-section unifilar-page" id="modelo-unifilar"><div class="section-number">15</div><div class="section-body">${running('15','Esquema unifilar')}<p class="eyebrow">Componente territorial · interconexión</p><h2>Esquema unifilar</h2><p class="lead">Sustituye al dibujo TikZ del flujo LaTeX. El texto queda seleccionable dentro del PDF y el archivo pesa una fracción de la imagen.</p>${renderUnifilar({
+    <section class="report-section polo-map-page" id="modelo-polo-mapa"><div class="section-number">15</div><div class="section-body">${running('15','Mapa del polo')}<p class="eyebrow">Componente territorial · geometría oficial</p><h2>Polígono declarado</h2><p class="lead">Se dibuja del propio GeoJSON: vectorial, sin mosaicos externos que la exportación bloquea, y con el contorno nacional reducido de 5 MB a 76 KB.</p>${renderPoloMap({"type":"polo-map","label":"Seybaplaya I","state":"Campeche","area_ha":99.99,"centroid":[-90.67611648,19.66490571],"rings":[[[-90.669222,19.662235],[-90.668318,19.667153],[-90.671879,19.66898],[-90.672157,19.668926],[-90.672596,19.668842],[-90.680207,19.66685],[-90.680335,19.6668],[-90.685119,19.665361],[-90.68461,19.663384],[-90.684678,19.662875],[-90.685505,19.662168],[-90.685561,19.662039],[-90.685563,19.661986],[-90.680188,19.662071],[-90.67816,19.662103],[-90.676329,19.662132],[-90.672979,19.662181],[-90.67296,19.662181],[-90.672961,19.662181],[-90.67296,19.662181],[-90.669222,19.662235]]]})}</div></section>
+    <section class="report-section unifilar-page" id="modelo-unifilar"><div class="section-number">16</div><div class="section-body">${running('16','Esquema unifilar')}<p class="eyebrow">Componente territorial · interconexión</p><h2>Esquema unifilar</h2><p class="lead">Sustituye al dibujo TikZ del flujo LaTeX. El texto queda seleccionable dentro del PDF y el archivo pesa una fracción de la imagen.</p>${renderUnifilar({
       type: 'unifilar',
       polo: 'PODECOBI Seybaplaya I',
       state: 'Campeche',
@@ -270,7 +273,7 @@ export function renderModelReport() {
         { value: '10 MW', label: 'Demanda máxima', variant: 'madura' }
       ]
     })}<p class="chart-source">Fuente: inventario maestro PODECOBI, corte del 14 de julio de 2026. Los datos de contacto del registro no se publican.</p></div></section>
-    <section class="report-section technical-sheet-page" id="modelo-ficha-tecnica"><div class="section-number">16</div><div class="section-body">${running('16','Ficha técnica y créditos')}<p class="eyebrow">Control documental</p><h2>Ficha técnica de la edición</h2><p class="lead">La publicación cierra con los datos suficientes para citarla, reproducirla y comprobar cómo fue generada.</p><dl class="technical-metadata"><div><dt>Unidad responsable</dt><dd>DGMESNIE</dd></div><div><dt>Formato maestro</dt><dd>HTML semántico · CSS de impresión</dd></div><div><dt>Salida documental</dt><dd>PDF etiquetado · tamaño carta</dd></div><div><dt>Fuentes gráficas</dt><dd>Sistema de Diseño SENER</dd></div><div><dt>Datos de muestra</dt><dd>Sintéticos · no institucionales</dd></div><div><dt>Versión del modelo</dt><dd>1.0.0-modelo</dd></div></dl><div class="technical-grid"><article><p class="eyebrow">Cita sugerida</p><p>Secretaría de Energía (2026). <i>Informe modelo editorial para publicaciones web</i>. DGMESNIE.</p></article><article><p class="eyebrow">Créditos funcionales</p><ul><li>Coordinación editorial institucional</li><li>Validación de datos y fuentes</li><li>Diseño y publicación web</li><li>Aseguramiento de calidad</li></ul></article></div><aside class="callout note"><b>Regla de producción</b><p>Los informes particulares deben sustituir esta ficha con sus responsables, fuentes autorizadas, versión, corte, licencia y cita aprobada.</p></aside></div></section>`;
+    <section class="report-section technical-sheet-page" id="modelo-ficha-tecnica"><div class="section-number">17</div><div class="section-body">${running('17','Ficha técnica y créditos')}<p class="eyebrow">Control documental</p><h2>Ficha técnica de la edición</h2><p class="lead">La publicación cierra con los datos suficientes para citarla, reproducirla y comprobar cómo fue generada.</p><dl class="technical-metadata"><div><dt>Unidad responsable</dt><dd>DGMESNIE</dd></div><div><dt>Formato maestro</dt><dd>HTML semántico · CSS de impresión</dd></div><div><dt>Salida documental</dt><dd>PDF etiquetado · tamaño carta</dd></div><div><dt>Fuentes gráficas</dt><dd>Sistema de Diseño SENER</dd></div><div><dt>Datos de muestra</dt><dd>Sintéticos · no institucionales</dd></div><div><dt>Versión del modelo</dt><dd>1.0.0-modelo</dd></div></dl><div class="technical-grid"><article><p class="eyebrow">Cita sugerida</p><p>Secretaría de Energía (2026). <i>Informe modelo editorial para publicaciones web</i>. DGMESNIE.</p></article><article><p class="eyebrow">Créditos funcionales</p><ul><li>Coordinación editorial institucional</li><li>Validación de datos y fuentes</li><li>Diseño y publicación web</li><li>Aseguramiento de calidad</li></ul></article></div><aside class="callout note"><b>Regla de producción</b><p>Los informes particulares deben sustituir esta ficha con sus responsables, fuentes autorizadas, versión, corte, licencia y cita aprobada.</p></aside></div></section>`;
   return pageShell({
     title: model.title,
     description: 'Muestrario local y reutilizable del sistema editorial de Informes DGMESNIE.',
@@ -482,9 +485,113 @@ function renderBlock(block) {
   if (block.type === 'flow') return renderFlow(block);
   if (block.type === 'polo') return renderPolo(block);
   if (block.type === 'unifilar') return renderUnifilar(block);
+  if (block.type === 'polo-map') return renderPoloMap(block);
   if (block.type === 'metrics') return `<div class="metrics-grid">${block.items.map((item) => `<article class="metric"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong><p>${escapeHtml(item.detail ?? '')}</p></article>`).join('')}</div>`;
   if (block.type === 'code') return `<pre><code>${escapeHtml(block.text)}</code></pre>`;
   return '';
+}
+
+// Contorno nacional simplificado para el localizador. Se carga una sola vez y
+// su ausencia sólo suprime el recuadro, nunca rompe el informe.
+let contornoNacional;
+function mexicoOutline() {
+  if (contornoNacional !== undefined) return contornoNacional;
+  try {
+    contornoNacional = JSON.parse(readFileSync(new URL('../../config/mexico-estados.json', import.meta.url), 'utf8'));
+  } catch {
+    contornoNacional = null;
+  }
+  return contornoNacional;
+}
+
+// Mapa de un polo: su polígono declarado a escala, con barra de escala y un
+// localizador nacional. Sustituye a la imagen rasterizada del flujo LaTeX; se
+// dibuja del propio GeoJSON, así que no depende de mosaicos externos que la
+// exportación bloquea.
+function renderPoloMap(block) {
+  const rings = (block.rings ?? []).filter((ring) => Array.isArray(ring) && ring.length > 2);
+  if (!rings.length) return '';
+  const points = rings.flat();
+  const lons = points.map(([lon]) => lon);
+  const lats = points.map(([, lat]) => lat);
+  const minLon = Math.min(...lons);
+  const maxLon = Math.max(...lons);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  // La longitud se comprime con el coseno de la latitud media para que la
+  // parcela no salga estirada a lo ancho.
+  const compress = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180) || 1;
+  const width = Math.max((maxLon - minLon) * compress, 1e-6);
+  const height = Math.max(maxLat - minLat, 1e-6);
+  const box = { w: 900, h: 560, pad: 42 };
+  const scale = Math.min((box.w - box.pad * 2) / width, (box.h - box.pad * 2) / height);
+  const offsetX = (box.w - width * scale) / 2;
+  const offsetY = (box.h - height * scale) / 2;
+  const project = ([lon, lat]) => [
+    (offsetX + (lon - minLon) * compress * scale).toFixed(1),
+    (offsetY + (maxLat - lat) * scale).toFixed(1)
+  ];
+  const shapes = rings.map((ring) => `<path class="polo-map-shape" d="${ring.map((point, index) => `${index ? 'L' : 'M'} ${project(point).join(' ')}`).join(' ')} Z"/>`).join('');
+
+  // Barra de escala: se elige una distancia redonda que ocupe menos de un
+  // tercio del ancho útil.
+  // `width` ya viene comprimido por el coseno, así que equivale a la distancia
+  // este-oeste real medida en grados de latitud.
+  const metersPerDegree = 111320;
+  const usableMeters = width * metersPerDegree;
+  const candidates = [100, 200, 500, 1000, 2000, 5000];
+  const barMeters = candidates.find((value) => value <= usableMeters / 3) ?? candidates[0];
+  const barPixels = (barMeters / metersPerDegree) * scale;
+  const bar = barPixels > 20 && barPixels < box.w * 0.6
+    ? `<g class="polo-map-escala"><path d="M ${box.pad} ${box.h - 24} h ${barPixels.toFixed(1)}"/>` +
+      `<path d="M ${box.pad} ${box.h - 30} v 12"/><path d="M ${(box.pad + barPixels).toFixed(1)} ${box.h - 30} v 12"/>` +
+      `<text x="${(box.pad + barPixels + 10).toFixed(1)}" y="${box.h - 19}">${barMeters >= 1000 ? `${barMeters / 1000} km` : `${barMeters} m`}</text></g>`
+    : '';
+
+  const outline = mexicoOutline();
+  let locator = '';
+  if (outline && Array.isArray(block.centroid) && block.centroid.length === 2) {
+    const inset = { w: 260, h: 170, pad: 8 };
+    const bounds = { minLon: -118.5, maxLon: -86.5, minLat: 14.4, maxLat: 32.8 };
+    const insetCompress = Math.cos(23 * Math.PI / 180);
+    const insetScale = Math.min(
+      (inset.w - inset.pad * 2) / ((bounds.maxLon - bounds.minLon) * insetCompress),
+      (inset.h - inset.pad * 2) / (bounds.maxLat - bounds.minLat)
+    );
+    const insetPoint = ([lon, lat]) => [
+      (inset.pad + (lon - bounds.minLon) * insetCompress * insetScale).toFixed(1),
+      (inset.pad + (bounds.maxLat - lat) * insetScale).toFixed(1)
+    ];
+    const paises = outline.states.map((state) => state.rings
+      .map((ring) => `${ring.map((point, index) => `${index ? 'L' : 'M'} ${insetPoint(point).join(' ')}`).join(' ')} Z`).join(' ')).join(' ');
+    const marca = insetPoint(block.centroid);
+    locator = `<g class="polo-map-localizador" transform="translate(${box.w - inset.w - 12} 12)">
+      <rect width="${inset.w}" height="${inset.h}" rx="4"/>
+      <path class="polo-map-pais" d="${paises}"/>
+      <circle class="polo-map-punto" cx="${marca[0]}" cy="${marca[1]}" r="6"/>
+    </g>`;
+  }
+
+  const coords = Array.isArray(block.centroid)
+    ? `${Math.abs(block.centroid[1]).toFixed(4)}° ${block.centroid[1] >= 0 ? 'N' : 'S'}, ${Math.abs(block.centroid[0]).toFixed(4)}° ${block.centroid[0] >= 0 ? 'E' : 'O'}`
+    : '';
+  const id = `polo-map-${hashText(`${block.label ?? ''}|${minLon}|${minLat}`)}`;
+  const resumen = [block.label, block.state, block.area_ha ? `${block.area_ha} hectáreas` : '', coords].filter(Boolean).join(', ');
+
+  return `<figure class="polo-map-figure">
+    <figcaption><span>Polígono declarado</span>${escapeHtml(block.caption ?? `Superficie y ubicación de ${block.label ?? 'el polo'}`)}</figcaption>
+    <svg class="polo-map" viewBox="0 0 ${box.w} ${box.h}" role="img" aria-labelledby="${id}-title ${id}-desc">
+      <title id="${id}-title">Polígono declarado de ${escapeHtml(block.label ?? 'el polo')}</title>
+      <desc id="${id}-desc">${escapeHtml(resumen)}</desc>
+      <rect class="polo-map-fondo" width="${box.w}" height="${box.h}"/>
+      ${shapes}${bar}${locator}
+    </svg>
+    <dl class="polo-map-datos">
+      ${block.area_ha ? `<div><dt>Superficie</dt><dd>${escapeHtml(String(block.area_ha))} ha</dd></div>` : ''}
+      ${coords ? `<div><dt>Centroide</dt><dd>${escapeHtml(coords)}</dd></div>` : ''}
+      ${block.state ? `<div><dt>Entidad</dt><dd>${escapeHtml(block.state)}</dd></div>` : ''}
+    </dl>
+  </figure>`;
 }
 
 // Ficha de un polo: identificación, cifras ancla, datos documentales y
