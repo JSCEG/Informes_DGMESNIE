@@ -111,8 +111,21 @@
       return;
     }
 
-    // En una hoja limpia el bloque suele volverse partible.
     node.remove();
+    // Si el tema aún no había colocado nada, su encabezado quedaría solo al pie
+    // y la hoja siguiente diría "continuación" sin que hubiera qué continuar.
+    // El tema entero se muda y arranca limpio.
+    if (currentTopic.article.children.length === 1) {
+      currentTopic.article.remove();
+      meta.parts -= 1;
+      current = null;
+      openSheet(meta);
+      openTopic(meta);
+      placeBlock(node, meta);
+      return;
+    }
+
+    // En una hoja limpia el bloque suele volverse partible.
     const orphan = takeTrailingHeading();
     startContinuation(meta);
     if (orphan) currentTopic.article.append(orphan);

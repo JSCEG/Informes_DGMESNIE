@@ -196,8 +196,6 @@ function poloBlock(polo, { includeContacts = false } = {}) {
 
   return {
     type: 'polo',
-    number: String(polo.num ?? ''),
-    name: polo.official_name ?? '',
     state: polo.state ?? '',
     municipality: polo.municipality ?? '',
     stage: polo.stage ?? '',

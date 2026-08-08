@@ -1002,3 +1002,8 @@ pre { padding: 20px; overflow: auto; background: var(--ink); color: var(--white)
 
 /* Marca de circulación interna en la portada. */
 .regulatory-cover-aviso { margin: 0 0 1.6cqw; padding: .8cqw 1.6cqw; color: var(--white); background: var(--wine); font: 800 clamp(8px, 1.15cqw, 11px) var(--mono); letter-spacing: .12em; text-transform: uppercase; justify-self: start; }
+
+/* Ficha usada como contenido de un apartado que ya lleva el nombre del polo. */
+.polo-ficha-sin-titulo .polo-encabezado { grid-template-columns: minmax(0, 1fr) auto; padding-bottom: 10px; align-items: center; }
+.polo-ficha-sin-titulo .polo-ubicacion { grid-area: 1 / 1; font-size: 14px; font-weight: 600; color: var(--body); }
+.polo-ficha-sin-titulo .polo-etapa { grid-area: 1 / 2 / auto / auto; }

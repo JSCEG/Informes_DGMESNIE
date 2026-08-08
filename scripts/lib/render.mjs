@@ -608,9 +608,13 @@ function renderPolo(block) {
   const activities = (block.activities ?? []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
   const progress = Number.isFinite(block.progress) ? `<div class="polo-avance"><span>Avance reportado</span><i><b style="width:${Math.max(0, Math.min(100, block.progress))}%"></b></i><strong>${block.progress}%</strong></div>` : '';
 
-  return `<article class="polo-ficha">
+  // El nombre sólo se imprime si el bloque lo trae. Cuando la ficha es el
+  // contenido de un apartado que ya se titula con el polo, repetirlo llenaría
+  // la hoja con el mismo texto dos veces.
+  const named = Boolean(block.name);
+  return `<article class="polo-ficha${named ? '' : ' polo-ficha-sin-titulo'}">
     <header class="polo-encabezado">
-      <div><span class="polo-numero">${escapeHtml(block.number ?? '')}</span><h2>${escapeHtml(block.name ?? '')}</h2></div>
+      ${named ? `<div><span class="polo-numero">${escapeHtml(block.number ?? '')}</span><h2>${escapeHtml(block.name)}</h2></div>` : ''}
       <p class="polo-ubicacion">${escapeHtml([block.municipality, block.state].filter(Boolean).join(', '))}</p>
       ${badge}
     </header>
