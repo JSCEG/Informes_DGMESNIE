@@ -573,7 +573,7 @@ function renderNationalMap(block) {
   const outline = mexicoOutline();
   const points = (block.points ?? []).filter((point) => Array.isArray(point.at) && point.at.length === 2);
   if (!outline || !points.length) return '';
-  const box = { w: 1000, h: 640, pad: 24 };
+  const box = { w: 1000, h: 575, pad: 20 };
   const bounds = { minLon: -118.5, maxLon: -86.0, minLat: 14.3, maxLat: 32.9 };
   const compress = Math.cos(23 * Math.PI / 180);
   const scale = Math.min(
@@ -588,8 +588,12 @@ function renderNationalMap(block) {
     .map((ring) => `${ring.map((point, index) => `${index ? 'L' : 'M'} ${project(point).join(' ')}`).join(' ')} Z`).join(' ')).join(' ');
   const marcas = points.map((point) => {
     const [x, y] = project(point.at);
-    return `<g class="mapa-punto"><circle cx="${x}" cy="${y}" r="9"/><text x="${x}" y="${(Number(y) + 4.5).toFixed(1)}" text-anchor="middle">${escapeHtml(point.label ?? '')}</text></g>`;
+    return `<g class="mapa-punto"><circle cx="${x}" cy="${y}" r="14"/><text x="${x}" y="${(Number(y) + 6).toFixed(1)}" text-anchor="middle">${escapeHtml(point.label ?? '')}</text></g>`;
   }).join('');
+  // Leyenda al pie: el número del mapa por sí solo no dice qué polo es.
+  const leyenda = points.some((point) => point.name)
+    ? `<ol class="mapa-leyenda">${points.map((point) => `<li><span>${escapeHtml(point.label ?? '')}</span><b>${escapeHtml(point.name ?? '')}</b>${point.detail ? `<em>${escapeHtml(point.detail)}</em>` : ''}</li>`).join('')}</ol>`
+    : '';
   const id = `mapa-nacional-${hashText(points.map((point) => point.at.join(',')).join('|'))}`;
   return `<figure class="chart-figure">
     <figcaption><span>${escapeHtml(block.eyebrow ?? 'Distribución territorial')}</span>${escapeHtml(block.caption ?? '')}</figcaption>
@@ -599,6 +603,7 @@ function renderNationalMap(block) {
       <path class="polo-map-pais" d="${paises}"/>
       ${marcas}
     </svg>
+    ${leyenda}
     ${block.source ? `<p class="chart-source">${escapeHtml(block.source)}</p>` : ''}
   </figure>`;
 }

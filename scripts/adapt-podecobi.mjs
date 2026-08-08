@@ -56,10 +56,10 @@ try {
         type: 'national-map',
         eyebrow: 'Distribución territorial',
         caption: `Los ${inventory.length} polos declarados y su entidad`,
-        source: 'Centroides del GeoJSON oficial; contorno de entidades simplificado para impresión.',
+        source: `Cada polo se ubica por el centroide de su polígono declarado. Los ${inventory.length} se distribuyen en ${states.size} entidades, de Baja California a Quintana Roo, sin que ninguna concentre más de uno.`,
         points: inventory
           .filter((polo) => Number.isFinite(polo.centroid_lon) && Number.isFinite(polo.centroid_lat))
-          .map((polo) => ({ at: [polo.centroid_lon, polo.centroid_lat], label: String(polo.num ?? ''), name: polo.official_name ?? '' }))
+          .map((polo) => ({ at: [polo.centroid_lon, polo.centroid_lat], label: String(polo.num ?? ''), name: polo.official_name ?? '', detail: polo.state ?? '' }))
       },
       {
         type: 'chart-bars',
