@@ -123,7 +123,10 @@
     if (node.tagName === 'UL' || node.tagName === 'OL') {
       return splitByChildren(node, node, () => node.cloneNode(false));
     }
-    if (node.classList.contains('timeline') || node.classList.contains('metrics-grid') || node.classList.contains('process-sequence')) {
+    // La ficha de polo es un bloque largo pero divisible: sus secciones pueden
+    // continuar en la hoja siguiente en vez de desbordar.
+    if (node.classList.contains('timeline') || node.classList.contains('metrics-grid')
+      || node.classList.contains('process-sequence') || node.classList.contains('polo-ficha')) {
       return splitByChildren(node, node, () => node.cloneNode(false));
     }
     if (node.classList.contains('table-figure')) return splitTableFigure(node);

@@ -30,14 +30,18 @@ let mode = preferredMode;
 let turnAnimation;
 let isTurning = false;
 
+// Un documento de circulación interna se marca en cada hoja, no sólo en la
+// portada: las hojas sueltas circulan más que el documento completo.
+const sello = reportMain?.dataset.distribution === 'interna' ? 'DGMESNIE · DISTRIBUCIÓN INTERNA' : 'DGMESNIE';
+
 for (const [index, page] of pageCandidates.entries()) {
   page.classList.add('reader-page');
   page.dataset.page = String(index + 1);
   page.dataset.pageLabel = `${index + 1} / ${pageCandidates.length}`;
   const folio = document.createElement('footer');
   folio.className = 'page-folio';
-  folio.setAttribute('aria-label', `DGMESNIE, hoja ${index + 1} de ${pageCandidates.length}`);
-  folio.innerHTML = `<span>DGMESNIE</span><span>${index + 1} / ${pageCandidates.length}</span>`;
+  folio.setAttribute('aria-label', `${sello}, hoja ${index + 1} de ${pageCandidates.length}`);
+  folio.innerHTML = `<span>${sello}</span><span>${index + 1} / ${pageCandidates.length}</span>`;
   page.append(folio);
 }
 

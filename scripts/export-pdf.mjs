@@ -12,6 +12,12 @@ const requestedOutput = path.resolve(args.output || 'output/pdf/modelo-editorial
 const publicOutput = args['public-output'] ? path.resolve(String(args['public-output'])) : null;
 const port = Number(args.port || 4199);
 const expectedTitle = String(args.title || 'Informe modelo editorial');
+// La ruta se valida antes de tocar el disco con ella. Algunos intérpretes
+// convierten `/informes/...` en una ruta de Windows al invocar el script, y sin
+// esta comprobación el error aparecería como un archivo inexistente.
+if (!route.startsWith('/') || route.includes('..') || route.includes('\\')) throw new Error(`--route debe ser una ruta pública absoluta y segura; se recibió "${route}".`);
+if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('--port debe ser un puerto local válido.');
+
 // El auditor conserva una ruta fija aunque el PDF lleve corte y versión, para
 // que la validación posterior sepa qué archivo produjo la corrida.
 const auditPath = requestedOutput.replace(/\.pdf$/i, '.audit.json');
@@ -20,8 +26,6 @@ const output = args.versioned
   ? requestedOutput.replace(/\.pdf$/i, `-${await releaseSuffix(root, route)}.pdf`)
   : requestedOutput;
 
-if (!route.startsWith('/') || route.includes('..') || route.includes('\\')) throw new Error('--route debe ser una ruta pública absoluta y segura.');
-if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('--port debe ser un puerto local válido.');
 await stat(path.join(root, 'index.html'));
 await mkdir(path.dirname(output), { recursive: true });
 const temporaryOutput = `${output}.tmp.pdf`;
@@ -113,7 +117,14 @@ try {
       // es otra hoja compuesta: una apertura o un diagrama ocupan hoja propia.
       const next = pages[index + 1];
       const closesRun = !next || !next.classList.contains('paginated-sheet');
-      return closesRun ? null : { page: index + 1, fill: Number(fill.toFixed(2)) };
+      if (closesRun) return null;
+      // Tampoco es desperdicio cuando lo primero de la hoja siguiente es un
+      // bloque indivisible que no cabía en el hueco: el compositor hizo lo que
+      // podía y adelantarlo habría partido una figura.
+      const leftover = usable - used;
+      const siguiente = next.querySelector('.packed-topic > *:not(.packed-topic-heading)');
+      if (siguiente && siguiente.getBoundingClientRect().height > leftover) return null;
+      return { page: index + 1, fill: Number(fill.toFixed(2)) };
     }).filter((item) => item && item.fill < 0.6);
     return {
       title: document.title,

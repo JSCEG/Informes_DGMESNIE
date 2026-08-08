@@ -192,7 +192,9 @@ html.is-paginating main { visibility: hidden; }
 .polo-map-figure { margin: 26px 0; }
 .polo-map-figure > figcaption { padding: 12px 0; display: flex; justify-content: space-between; gap: 20px; border-top: 3px solid var(--gold); color: var(--muted); font-size: 11px; }
 .polo-map-figure > figcaption span { color: var(--wine); font: 800 9px var(--mono); letter-spacing: .11em; text-transform: uppercase; }
-.polo-map { width: 100%; height: auto; display: block; margin-top: 10px; border: 1px solid var(--line); }
+/* La proporción se declara explícita: un SVG en línea con height:auto puede
+   medir cero, y el paginador reservaría una caja que luego crece al imprimir. */
+.polo-map { width: 100%; height: auto; aspect-ratio: 900 / 560; display: block; margin-top: 10px; border: 1px solid var(--line); }
 .polo-map-fondo { fill: #f7f5f1; }
 .polo-map-shape { fill: rgba(155, 34, 71, .16); stroke: var(--wine); stroke-width: 2.4; stroke-linejoin: round; }
 .polo-map-escala path { stroke: var(--ink); stroke-width: 2; fill: none; }
@@ -209,7 +211,7 @@ html.is-paginating main { visibility: hidden; }
 .unifilar-figure { margin: 28px 0; }
 .unifilar-figure > figcaption { padding: 12px 0; display: flex; justify-content: space-between; gap: 20px; border-top: 3px solid var(--gold); color: var(--muted); font-size: 11px; }
 .unifilar-figure > figcaption span { color: var(--wine); font: 800 9px var(--mono); letter-spacing: .11em; text-transform: uppercase; }
-.unifilar { width: 100%; height: auto; display: block; margin-top: 10px; }
+.unifilar { width: 100%; height: auto; aspect-ratio: 1480 / 900; display: block; margin-top: 10px; }
 .unifilar rect, .unifilar circle { stroke-width: 1.6; }
 .unifilar-fuente rect, .unifilar-kpi rect { fill: #eaf3ef; stroke: #6fa89a; }
 .unifilar-alterna rect, .unifilar-madura rect { fill: #fbf2de; stroke: #cfa858; }
@@ -997,3 +999,6 @@ pre { padding: 20px; overflow: auto; background: var(--ink); color: var(--white)
   body.pdf-export .video-frame::before { content: "Contenido audiovisual disponible en la versión web"; max-width: 300px; color: var(--muted); font: 700 13px/1.5 var(--sans); text-align: center; }
   body.pdf-export .video-frame iframe { display: none !important; }
 }
+
+/* Marca de circulación interna en la portada. */
+.regulatory-cover-aviso { margin: 0 0 1.6cqw; padding: .8cqw 1.6cqw; color: var(--white); background: var(--wine); font: 800 clamp(8px, 1.15cqw, 11px) var(--mono); letter-spacing: .12em; text-transform: uppercase; justify-self: start; }

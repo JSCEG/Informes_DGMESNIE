@@ -19,15 +19,19 @@ try {
   if (contract.classification !== 'public-candidate' || contract.publication_approved !== false) throw new Error('El archivo de entrada no es un candidato shadow esperado.');
   const { _private, ...publicFields } = contract;
   const stamp = new Date().toISOString();
+  // La clasificación se decide al aprobar, no al adaptar: es el momento en que
+  // una persona resuelve hasta dónde circula la edición.
+  const internal = args.internal === true;
+  if (internal && localDraft) throw new Error('--internal y --local-draft son alcances distintos; elija uno.');
   const approved = {
     ...publicFields,
-    classification: 'public',
+    classification: internal ? 'internal' : 'public',
     publication_approved: true,
-    publication_scope: localDraft ? 'local-only' : 'public-release',
+    publication_scope: internal ? 'internal-distribution' : (localDraft ? 'local-only' : 'public-release'),
     published_at: stamp,
-    status: localDraft ? 'borrador local — no publicado' : 'publicación aprobada',
-    content_notice: localDraft ? 'Borrador web local generado del resultado canónico real. Superó controles técnicos de contenido publicable, pero no ha sido desplegado ni enviado.' : publicFields.content_notice,
-    review: { approved_by: reviewer, approved_at: stamp, basis: localDraft ? 'Autorización del usuario para generar un borrador web exclusivamente local; no autoriza despliegue.' : 'Revisión editorial y confirmación explícita de difusión pública' }
+    status: internal ? 'distribución interna' : (localDraft ? 'borrador local — no publicado' : 'publicación aprobada'),
+    content_notice: internal ? 'Documento de circulación interna. Contiene enlaces institucionales y no debe publicarse en el sitio ni difundirse fuera de la lista de destinatarios.' : (localDraft ? 'Borrador web local generado del resultado canónico real. Superó controles técnicos de contenido publicable, pero no ha sido desplegado ni enviado.' : publicFields.content_notice),
+    review: { approved_by: reviewer, approved_at: stamp, basis: internal ? 'Revisión editorial para circulación interna; no autoriza publicación web.' : (localDraft ? 'Autorización del usuario para generar un borrador web exclusivamente local; no autoriza despliegue.' : 'Revisión editorial y confirmación explícita de difusión pública') }
   };
 
   // Volver a aprobar el mismo contenido no es una edición nueva. Sin esto, el

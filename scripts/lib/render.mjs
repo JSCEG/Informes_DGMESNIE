@@ -62,7 +62,7 @@ export function renderReport(contract, manifest, { immutable = false, baseUrl = 
         <div class="reader-actions"><a href="#contenido">Índice</a><button type="button" data-reader-action="view">Vista por hojas</button><button type="button" data-reader-action="zoom-out" aria-label="Alejar">−</button><output data-zoom-indicator>100%</output><button type="button" data-reader-action="zoom-in" aria-label="Acercar">+</button><button type="button" data-reader-action="fit">Ajustar</button><button type="button" data-reader-action="fullscreen">Pantalla completa</button>${contract.optional_pdf ? `<a href="${escapeHtml(contract.optional_pdf)}">Descargar PDF</a>` : '<button type="button" data-reader-action="print">Imprimir / guardar PDF</button>'}</div>
         <span class="reading-track" aria-hidden="true"><i data-reading-progress></i></span>
       </div>
-      <main>
+      <main${contract.classification === 'internal' ? ' data-distribution="interna"' : ''}>
         ${cover}
         <section class="report-toc" id="contenido" data-flow-list data-flow-label="Índice"><div class="toc-heading" data-flow-deck><div><p class="eyebrow">Navegación editorial</p><h2>Índice</h2></div><p>${topLevelSections.length} capítulos · ${contentSections.length} apartados · edición con corte al ${escapeHtml(contract.cutoff)}</p></div><p class="eyebrow toc-continued-label" data-flow-continued data-flow-counter>Índice</p><ol>${toc}</ol></section>
         <nav class="report-index" aria-label="Índice del informe"><p>En esta edición</p>${nav}</nav>
@@ -100,6 +100,7 @@ function renderEditorialCover(contract, manifest, { topLevelSections, contentSec
       </div>
       <div class="regulatory-cover-foot">
         <p class="regulatory-cover-unit"><b>DGMESNIE</b><span>Dirección General de Metodologías y Estadísticas del Sistema Nacional de Información Energética</span></p>
+        ${contract.classification === 'internal' ? '<p class="regulatory-cover-aviso">Documento de circulación interna · no publicar</p>' : ''}
         <dl class="regulatory-cover-meta">
           <div><dt>Corte documental</dt><dd>${escapeHtml(contract.cutoff)}</dd></div>
           <div><dt>Versión</dt><dd>${escapeHtml(contract.version)}</dd></div>
