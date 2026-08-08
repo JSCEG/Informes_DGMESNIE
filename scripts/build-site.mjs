@@ -1,9 +1,22 @@
-import { cp, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { parseArgs, requireArg } from './lib/args.mjs';
 import { assertValidContract, loadContract, loadPolicy, releaseId, sanitizePublicManifest } from './lib/contract.mjs';
 import { renderModelReport, renderPortal, renderReport } from './lib/render.mjs';
+
+const MODELO_EDITORIAL = {
+  report_id: 'modelo-editorial-dgmesnie',
+  slug: 'modelo-editorial',
+  kind: 'Muestrario editorial',
+  title: 'Informe modelo editorial',
+  description: 'Plantilla local con repertorio de texto, KPIs, tablas, gráficas, mapas, figuras, referencias y contraportada.',
+  status: 'modelo local · datos ilustrativos',
+  cutoff: '2026-08-07',
+  version: '1.0.0-modelo',
+  latest_path: '/informes/modelo-editorial/',
+  version_path: '/informes/modelo-editorial/'
+};
 
 let staging;
 try {
@@ -36,6 +49,12 @@ try {
   const latestDir = path.join(staging, 'informes', contract.slug);
   const versionDir = path.join(latestDir, 'versiones', id);
   await mkdir(path.join(staging, 'assets'), { recursive: true });
+  // Se conserva el árbol completo de informes: publicar uno no puede borrar a
+  // los demás ni su historial de ediciones inmutables.
+  await cp(path.join(output, 'informes'), path.join(staging, 'informes'), { recursive: true }).catch((error) => {
+    if (error.code !== 'ENOENT') throw error;
+  });
+  await rm(latestDir, { recursive: true, force: true });
   await cp(existingVersionRoot, path.join(latestDir, 'versiones'), { recursive: true }).catch((error) => {
     if (error.code !== 'ENOENT') throw error;
   });
@@ -64,7 +83,7 @@ try {
   const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
   await writeFile(path.join(latestDir, 'manifest.json'), manifestText);
   await writeFile(path.join(versionDir, 'manifest.json'), manifestText);
-  const catalog = buildCatalog(contract, id);
+  const catalog = await buildCatalog(staging, contract.cutoff);
   await writeFile(path.join(staging, 'catalog.json'), `${JSON.stringify(catalog, null, 2)}\n`);
   await writeFile(path.join(staging, 'index.html'), renderPortal(catalog));
   await writeFile(path.join(staging, '_headers'), `/informes/*/versiones/*\n  Cache-Control: public, max-age=31536000, immutable\n\n/informes/*\n  Cache-Control: no-cache\n\n/catalog.json\n  Cache-Control: no-cache\n`);
@@ -88,34 +107,35 @@ try {
   process.exitCode = 1;
 }
 
-function buildCatalog(contract, id) {
-  return {
-    schema_version: 1,
-    generated_on: contract.cutoff,
-    reports: [{
-      report_id: contract.report_id,
-      slug: contract.slug,
-      kind: 'Radar regulatorio',
-      title: contract.title,
-      description: contract.description ?? contract.summary ?? '',
-      status: contract.status,
-      cutoff: contract.cutoff,
-      version: contract.version,
-      latest_path: `/informes/${contract.slug}/`,
-      version_path: `/informes/${contract.slug}/versiones/${id}/`
-    }, {
-      report_id: 'modelo-editorial-dgmesnie',
-      slug: 'modelo-editorial',
-      kind: 'Muestrario editorial',
-      title: 'Informe modelo editorial',
-      description: 'Plantilla local con repertorio de texto, KPIs, tablas, gráficas, mapas, figuras, referencias y contraportada.',
-      status: 'modelo local · datos ilustrativos',
-      cutoff: '2026-08-07',
-      version: '1.0.0-modelo',
-      latest_path: '/informes/modelo-editorial/',
-      version_path: '/informes/modelo-editorial/'
-    }]
-  };
+// El catálogo describe lo que realmente está publicado: se arma leyendo el
+// manifiesto de cada informe del árbol, no una lista escrita a mano que habría
+// que editar cada vez que se suma un informe.
+async function buildCatalog(siteRoot, generatedOn) {
+  const reportsRoot = path.join(siteRoot, 'informes');
+  const entries = await readdir(reportsRoot, { withFileTypes: true }).catch((error) => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  const reports = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory() || entry.name === 'modelo-editorial') continue;
+    const manifest = await readJsonIfPresent(path.join(reportsRoot, entry.name, 'manifest.json'));
+    if (!manifest) continue;
+    reports.push({
+      report_id: manifest.report_id,
+      slug: manifest.slug,
+      kind: manifest.kind ?? 'Informe institucional',
+      title: manifest.title,
+      description: manifest.description ?? '',
+      status: manifest.status,
+      cutoff: manifest.cutoff,
+      version: manifest.version,
+      latest_path: `/informes/${manifest.slug}/`,
+      version_path: `/informes/${manifest.slug}/versiones/${manifest.release_id}/`
+    });
+  }
+  reports.sort((left, right) => String(right.cutoff).localeCompare(String(left.cutoff)) || left.slug.localeCompare(right.slug));
+  return { schema_version: 1, generated_on: generatedOn, reports: [...reports, MODELO_EDITORIAL] };
 }
 
 async function readJsonIfPresent(filePath) {
@@ -134,7 +154,7 @@ async function refreshLocalShell(output, { contract, manifest, id, baseUrl } = {
     const reportDir = path.join(output, 'informes', contract.slug);
     await writeFile(path.join(reportDir, 'index.html'), renderReport(contract, manifest, { baseUrl }));
     await writeFile(path.join(reportDir, 'versiones', id, 'index.html'), renderReport(contract, manifest, { immutable: true, baseUrl }));
-    await writeFile(path.join(output, 'index.html'), renderPortal(buildCatalog(contract, id)));
+    await writeFile(path.join(output, 'index.html'), renderPortal(await buildCatalog(output, contract.cutoff)));
   }
   await cp(path.resolve('src/site/styles.css'), path.join(assetDir, 'styles.css'));
   await cp(path.resolve('src/site/app.js'), path.join(assetDir, 'app.js'));

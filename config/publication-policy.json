@@ -1,7 +1,14 @@
 {
   "schema_version": 1,
   "allowed_report_ids": [
-    "radar-regulatorio-energ-tico-dgmesnie"
+    "radar-regulatorio-energ-tico-dgmesnie",
+    "podecobi-dgmesnie",
+    "radar-transparencia-dgmesnie",
+    "reuniones-sostenidas-dgmesnie"
+  ],
+  "allowed_cover_variants": [
+    "ribbon",
+    "editorial-image"
   ],
   "allowed_source_hosts": [
     "dof.gob.mx",

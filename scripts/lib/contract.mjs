@@ -56,6 +56,23 @@ export function validateContract(contract, policy, { mode = 'publish', raw = JSO
   if (!/^\d{4}-\d{2}-\d{2}$/.test(contract.cutoff ?? '') || Number.isNaN(Date.parse(`${contract.cutoff}T00:00:00Z`))) errors.push('cutoff debe ser una fecha ISO válida YYYY-MM-DD.');
   if (!/^\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/i.test(contract.version ?? '')) errors.push('version debe usar semver.');
   if (contract.published_at && Number.isNaN(Date.parse(contract.published_at))) errors.push('published_at debe ser ISO-8601 válido.');
+  // Identidad editorial: lo que antes estaba escrito a mano en el renderizador
+  // ahora lo declara cada informe y el gate lo valida.
+  if (contract.kind !== undefined && (typeof contract.kind !== 'string' || !contract.kind.trim())) errors.push('kind debe ser un texto no vacío.');
+  if (contract.running_title !== undefined && (typeof contract.running_title !== 'string' || !contract.running_title.trim())) errors.push('running_title debe ser un texto no vacío.');
+  if (contract.cover !== undefined) {
+    const cover = contract.cover;
+    if (!cover || typeof cover !== 'object' || Array.isArray(cover)) errors.push('cover debe ser un objeto.');
+    else {
+      const variants = policy.allowed_cover_variants ?? ['ribbon'];
+      if (cover.variant !== undefined && !variants.includes(cover.variant)) errors.push(`cover.variant no está permitido: ${cover.variant}.`);
+      for (const field of ['photo', 'photo_alt']) {
+        if (cover[field] !== undefined && typeof cover[field] !== 'string') errors.push(`cover.${field} debe ser un texto.`);
+      }
+      // Un activo de portada sólo puede venir del propio sitio.
+      if (typeof cover.photo === 'string' && !/^\/assets\/[A-Za-z0-9._/-]+$/.test(cover.photo)) errors.push('cover.photo debe ser una ruta local bajo /assets/.');
+    }
+  }
   if (!Array.isArray(contract.sections) || contract.sections.length === 0) errors.push('sections debe incluir al menos una sección.');
   if ((contract.sections?.length ?? 0) > policy.max_sections) errors.push('El contrato excede el máximo de secciones.');
   if (!Array.isArray(contract.sources)) errors.push('sources debe ser una lista.');
@@ -165,6 +182,10 @@ export function sanitizePublicManifest(contract, baseUrl) {
     report_id: contract.report_id,
     slug: contract.slug,
     title: contract.title,
+    // El catálogo se arma leyendo los manifiestos publicados, así que cada uno
+    // debe bastarse para describir su informe.
+    kind: contract.kind ?? 'Informe institucional',
+    description: contract.description ?? contract.summary ?? '',
     status: contract.status,
     cutoff: contract.cutoff,
     version: contract.version,

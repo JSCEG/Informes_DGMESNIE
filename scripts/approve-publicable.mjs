@@ -44,7 +44,7 @@ try {
   assertValidContract(approved, policy, { mode: 'publish', raw });
   await mkdir(path.dirname(output), { recursive: true });
   await writeFile(output, `${raw}\n`, { flag: 'wx' }).catch(async (error) => {
-    if (error.code !== 'EEXIST' || !localDraft || args.overwrite !== true) throw error;
+    if (error.code !== 'EEXIST' || args.overwrite !== true) throw error;
     await writeFile(output, `${raw}\n`);
   });
   console.log(JSON.stringify({

@@ -13,6 +13,15 @@ export function renderRich(value) {
     : escapeHtml(run.t))).join('');
 }
 
+export function reportKind(contract) {
+  return contract.kind || 'Informe institucional';
+}
+
+// Rótulo que acompaña cada apertura de capítulo y la portada secundaria.
+export function runningTitle(contract) {
+  return contract.running_title || contract.kind || contract.title;
+}
+
 export function plainText(value) {
   if (value == null) return '';
   return typeof value === 'string' ? value : String(value.text ?? '');
@@ -66,15 +75,17 @@ export function renderReport(contract, manifest, { immutable = false, baseUrl = 
   });
 }
 
+// La portada de cinta es el formato estándar de los informes: cada uno declara
+// su fotografía y su rótulo, no su slug.
 function renderEditorialCover(contract, manifest, { topLevelSections, contentSections }) {
-  if (contract.slug === 'radar-regulatorio-energetico') {
-    // La portada se compone en HTML: el arte autorizado guardaba toda la
-    // tipografía como trazos, así que el título no existía en la capa de texto
-    // del PDF y una errata no podía corregirse.
+  const cover = contract.cover ?? {};
+  if ((cover.variant ?? 'ribbon') === 'ribbon') {
+    // La portada se compone en HTML para que el título exista en la capa de
+    // texto del PDF y sea corregible.
     const period = coverPeriod(contract);
     return `<section class="report-cover editorial-cover regulatory-cover">
       <div class="regulatory-cover-art" aria-hidden="true">
-        <img src="/assets/portada-marco-regulatorio.jpg" alt="">
+        <img src="${escapeHtml(cover.photo ?? '/assets/portada-marco-regulatorio.jpg')}" alt="">
         <span class="cover-scrim"></span>
       </div>
       <header class="regulatory-cover-top">
@@ -98,8 +109,8 @@ function renderEditorialCover(contract, manifest, { topLevelSections, contentSec
   }
   return `<section class="report-cover editorial-cover">
     <div class="cover-visual">
-      <img class="cover-photo" src="/assets/reno-portada.png" alt="Infraestructura energética con generación solar, eólica y almacenamiento">
-      <div class="visual-register"><span>RADAR REGULATORIO</span><b>${escapeHtml(contract.cutoff.slice(0, 4))}</b></div>
+      <img class="cover-photo" src="${escapeHtml(cover.photo ?? '/assets/reno-portada.png')}" alt="${escapeHtml(cover.photo_alt ?? 'Infraestructura energética con generación solar, eólica y almacenamiento')}">
+      <div class="visual-register"><span>${escapeHtml(reportKind(contract).toLocaleUpperCase('es-MX'))}</span><b>${escapeHtml(contract.cutoff.slice(0, 4))}</b></div>
       <div class="visual-stats"><span><b>${String(topLevelSections.length).padStart(2, '0')}</b> capítulos</span><span><b>${String(contentSections.length).padStart(2, '0')}</b> secciones</span><span><b>${String(manifest.source_count).padStart(2, '0')}</b> fuentes</span></div>
     </div>
     <div class="cover-rule"></div>
@@ -268,7 +279,7 @@ function renderPortalHeader() {
 }
 
 function renderReportHeader(contract) {
-  const reportKind = contract.kind || 'Radar regulatorio';
+  const kind = reportKind(contract);
   return `<div class="report-shell-head">
     <header class="site-header report-header">
       <a class="brand" href="/" aria-label="Informes DGMESNIE — inicio">
@@ -277,7 +288,7 @@ function renderReportHeader(contract) {
       </a>
       <a class="header-link" href="/">Ver catálogo</a>
     </header>
-    <div class="report-context" aria-label="Ruta del informe"><div><a href="/">Informes</a><span>›</span><a href="/informes/${escapeHtml(contract.slug)}/">${escapeHtml(reportKind)}</a><span>›</span><strong>${escapeHtml(contract.status)}</strong></div><span class="context-release">Corte ${escapeHtml(contract.cutoff)} · v${escapeHtml(contract.version)}</span></div>
+    <div class="report-context" aria-label="Ruta del informe"><div><a href="/">Informes</a><span>›</span><a href="/informes/${escapeHtml(contract.slug)}/">${escapeHtml(kind)}</a><span>›</span><strong>${escapeHtml(contract.status)}</strong></div><span class="context-release">Corte ${escapeHtml(contract.cutoff)} · v${escapeHtml(contract.version)}</span></div>
   </div>`;
 }
 
@@ -321,7 +332,7 @@ function renderContentPages(contentSections, contract) {
       const nextChapter = contentSections.findIndex((candidate, candidateIndex) => candidateIndex > index && (candidate.level ?? 1) === 1);
       const chapterSections = contentSections.slice(index + 1, nextChapter < 0 ? undefined : nextChapter);
       const subheads = chapterSections.filter((candidate) => (candidate.level ?? 1) === 2).map((candidate) => candidate.title);
-      output.push(`<section class="chapter-opener" id="${escapeHtml(section.id)}" aria-labelledby="${escapeHtml(section.id)}-opener-title"><div class="chapter-opener-top"><span>Sección ${escapeHtml(section.number || String(index + 1).padStart(2, '0'))}</span><i></i><small>Corte ${escapeHtml(contract.cutoff)}</small></div><div class="chapter-opener-title"><strong>${escapeHtml(section.number || String(index + 1).padStart(2, '0'))}</strong><h2 id="${escapeHtml(section.id)}-opener-title">${escapeHtml(section.title)}</h2><p>Marco regulatorio energético · edición ${escapeHtml(contract.version)}</p></div>${subheads.length ? `<div class="chapter-opener-contents"><b>En este capítulo</b>${subheads.slice(0, 4).map((title) => `<span>${escapeHtml(title)}</span>`).join('')}</div>` : ''}</section>`);
+      output.push(`<section class="chapter-opener" id="${escapeHtml(section.id)}" aria-labelledby="${escapeHtml(section.id)}-opener-title"><div class="chapter-opener-top"><span>Sección ${escapeHtml(section.number || String(index + 1).padStart(2, '0'))}</span><i></i><small>Corte ${escapeHtml(contract.cutoff)}</small></div><div class="chapter-opener-title"><strong>${escapeHtml(section.number || String(index + 1).padStart(2, '0'))}</strong><h2 id="${escapeHtml(section.id)}-opener-title">${escapeHtml(section.title)}</h2><p>${escapeHtml(runningTitle(contract))} · edición ${escapeHtml(contract.version)}</p></div>${subheads.length ? `<div class="chapter-opener-contents"><b>En este capítulo</b>${subheads.slice(0, 4).map((title) => `<span>${escapeHtml(title)}</span>`).join('')}</div>` : ''}</section>`);
     }
 
     const runningHead = currentChapter ? `<div class="chapter-running-head"><a href="#contenido">${escapeHtml(currentChapter.number || '')} · ${escapeHtml(currentChapter.title)}</a><span>Corte ${escapeHtml(contract.cutoff)}</span></div>` : '';

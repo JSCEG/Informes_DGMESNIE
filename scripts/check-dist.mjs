@@ -15,13 +15,25 @@ try {
     'assets/sener-logo.png', 'assets/reno-portada.png', 'assets/reno-anexos.png',
     'assets/mujer.png', 'assets/gobierno-mexico-logo.png', 'assets/gcr-data.js', 'assets/portada-marco-regulatorio.jpg',
     'assets/fonts/Patria_Bold.otf', 'assets/fonts/NotoSans-Medium.ttf',
-    'informes/radar-regulatorio-energetico/index.html',
-    'informes/radar-regulatorio-energetico/manifest.json',
     'informes/modelo-editorial/index.html'
   ];
   const relative = files.map((file) => path.relative(root, file).replaceAll('\\', '/'));
   for (const name of required) if (!relative.includes(name)) throw new Error(`Falta el artefacto ${name}.`);
-  if (!relative.some((name) => /^informes\/radar-regulatorio-energetico\/versiones\/[^/]+\/index\.html$/.test(name))) throw new Error('Falta la versión inmutable.');
+
+  // Cada informe del catálogo debe existir con su manifiesto y al menos una
+  // edición inmutable. El publicador sirve varios informes, así que la lista no
+  // puede estar escrita a mano.
+  const catalog = JSON.parse(await readFile(path.join(root, 'catalog.json'), 'utf8'));
+  const publicados = (catalog.reports ?? []).filter((report) => report.slug !== 'modelo-editorial');
+  if (!publicados.length) throw new Error('El catálogo no declara ningún informe publicado.');
+  for (const report of publicados) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(report.slug ?? '')) throw new Error(`Slug de catálogo no válido: ${report.slug}.`);
+    for (const name of [`informes/${report.slug}/index.html`, `informes/${report.slug}/manifest.json`]) {
+      if (!relative.includes(name)) throw new Error(`Falta el artefacto ${name} declarado en el catálogo.`);
+    }
+    const version = new RegExp(`^informes/${report.slug}/versiones/[^/]+/index\\.html$`);
+    if (!relative.some((name) => version.test(name))) throw new Error(`Falta la versión inmutable de ${report.slug}.`);
+  }
   const styles = await readFile(path.join(root, 'assets', 'styles.css'), 'utf8');
   if (!/--sheet-width:\s*8\.5in;/.test(styles) || !/--sheet-height:\s*11in;/.test(styles) || !/aspect-ratio:\s*17\s*\/\s*22/.test(styles) || !/@page\s*\{\s*size:\s*Letter portrait/.test(styles)) throw new Error('El lector no conserva la proporción carta 8.5 × 11 pulgadas.');
   const readerScript = await readFile(path.join(root, 'assets', 'app.js'), 'utf8');
